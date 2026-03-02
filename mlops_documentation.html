@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MLOps Framework Documentation | MAPE · WAPE · SHAP · MLflow · Airflow</title>
+  <meta name="description" content="Standardized MLOps Framework — MAPE, WAPE, SHAP, MLflow, Airflow." />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    /*** RESET ***/
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /*** NEUMORPHISM TOKENS ***/
+    :root {
+      --bg: #1e2030;
+      --bg-light: #252840;
+      --bg-dark: #171828;
+      --shadow-l: rgba(255, 255, 255, 0.05);
+      --shadow-d: rgba(0, 0, 0, 0.55);
+      --nm-out: 6px 6px 14px var(--shadow-d), -4px -4px 10px var(--shadow-l);
+      --nm-in: inset 4px 4px 10px var(--shadow-d), inset -3px -3px 8px var(--shadow-l);
+      --nm-flat: 2px 2px 6px var(--shadow-d), -2px -2px 5px var(--shadow-l);
+      --text: #cdd0e8;
+      --text-dim: #6b6f8a;
+      --text-head: #e8eaff;
+      --accent: #7c6af7;
+      --accent2: #4fc3f7;
+      --accent3: #f06292;
+      --accent4: #66bb6a;
+      --accent5: #ffb74d;
+      --r: 18px;
+      --r-sm: 12px;
+      --nav-w: 240px;
+    }
+
+    /*** BODY ***/
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /*** VERTICAL SIDEBAR ***/
+    #sidebar {
+      width: var(--nav-w);
+      min-height: 100vh;
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      border-right: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .side-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 0 1.5rem 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 1.5rem;
+    }
+
+    .brand-orb {
+      width: 54px;
+      height: 54px;
+      border-radius: 16px;
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      transition: box-shadow 0.3s;
+    }
+
+    .brand-orb:hover {
+      box-shadow: var(--nm-in);
+    }
+
+    .brand-text {
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--text-head);
+    }
+
+    .brand-sub {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.4px;
+      text-align: center;
+    }
+
+    /*** NAV LINKS ***/
+    .nav-section-label {
+      font-size: 0.58rem;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 1.6rem;
+      margin: 0.8rem 0 0.4rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.65rem 1.6rem;
+      margin: 2px 0.8rem;
+      border-radius: 10px;
+      font-size: 0.81rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--text-head);
+      background: var(--bg-light);
+      box-shadow: var(--nm-flat);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+    }
+
+    .nav-link .nav-icon {
+      font-size: 1rem;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-link .nav-num {
+      margin-left: auto;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
+    .nav-link:hover .nav-num {
+      color: var(--accent);
+    }
+
+    /*** NAV FOOTER ***/
+    .side-footer {
+      margin-top: auto;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .side-badge {
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: 10px;
+      padding: 0.7rem;
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .side-badge strong {
+      color: var(--accent);
+    }
+
+    /*** MAIN CONTENT ***/
+    #main {
+      margin-left: var(--nav-w);
+      flex: 1;
+      padding: 2.5rem 2rem 4rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .content-inner {
+      width: 100%;
+      max-width: 820px;
+    }
+
+    /*** NM CARD ***/
+    .nm-card {
+      background: var(--bg);
+      border-radius: var(--r);
+      box-shadow: var(--nm-out);
+      padding: 2.6rem 2.8rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Colored accent line on left edge */
+    .nm-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .nm-card.c-purple::before {
+      background: var(--accent);
+      box-shadow: 0 0 14px var(--accent);
+    }
+
+    .nm-card.c-cyan::before {
+      background: var(--accent2);
+      box-shadow: 0 0 14px var(--accent2);
+    }
+
+    .nm-card.c-pink::before {
+      background: var(--accent3);
+      box-shadow: 0 0 14px var(--accent3);
+    }
+
+    .nm-card.c-green::before {
+      background: var(--accent4);
+      box-shadow: 0 0 14px var(--accent4);
+    }
+
+    .nm-card.c-amber::before {
+      background: var(--accent5);
+      box-shadow: 0 0 14px var(--accent5);
+    }
+
+    /*** COVER CARD ***/
+    .nm-cover {
+      background: var(--bg);
+      border-radius: var(--r);
+      box-shadow:
+        10px 10px 24px rgba(0, 0, 0, 0.65),
+        -6px -6px 16px rgba(255, 255, 255, 0.055);
+      padding: 4rem 3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nm-cover::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124, 106, 247, 0.08) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .cover-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--bg);
+      border-radius: 20px;
+      box-shadow: var(--nm-out);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.8rem;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: 100px;
+      padding: 5px 18px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.6rem;
+    }
+
+    .nm-cover h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--text-head);
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+    }
+
+    .nm-cover h1 span {
+      color: var(--accent);
+    }
+
+    .nm-cover .sub {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin-bottom: 2.2rem;
+    }
+
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      background: var(--bg);
+      box-shadow: var(--nm-flat);
+      border-radius: 100px;
+      padding: 5px 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+      transition: all 0.2s;
+    }
+
+    .chip:hover {
+      box-shadow: var(--nm-in);
+      color: var(--accent);
+    }
+
+    /*** STATS ***/
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin: 2rem 0 0;
+    }
+
+    .stat-pill {
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      padding: 1.2rem;
+      text-align: center;
+    }
+
+    .stat-val {
+      display: block;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--accent);
+      letter-spacing: -1px;
+      text-shadow: 0 0 20px rgba(124, 106, 247, 0.4);
+    }
+
+    .stat-lbl {
+      display: block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-top: 0.3rem;
+    }
+
+    /*** SECTION HEADING ***/
+    .sec-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }
+
+    .sec-label.purple {
+      color: var(--accent);
+    }
+
+    .sec-label.cyan {
+      color: var(--accent2);
+    }
+
+    .sec-label.pink {
+      color: var(--accent3);
+    }
+
+    .sec-label.green {
+      color: var(--accent4);
+    }
+
+    .sec-label.amber {
+      color: var(--accent5);
+    }
+
+    .sec-title {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--text-head);
+      letter-spacing: -0.5px;
+      margin-bottom: 0.2rem;
+    }
+
+    .sec-divider {
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent);
+      margin: 1.1rem 0 1.8rem;
+    }
+
+    h3.sub {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #c0c2e0;
+      margin: 1.8rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    h3.sub .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent);
+      flex-shrink: 0;
+    }
+
+    p {
+      font-size: 0.91rem;
+      line-height: 1.88;
+      color: var(--text);
+      margin-bottom: 0.85rem;
+    }
+
+    ul,
+    ol {
+      margin: 0.5rem 0 1rem 1.3rem;
+      color: var(--text);
+    }
+
+    li {
+      font-size: 0.89rem;
+      line-height: 1.8;
+      margin-bottom: 0.2rem;
+    }
+
+    strong {
+      color: #d8daf8;
+    }
+
+    /*** FORMULA ***/
+    .formula-box {
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      padding: 1.6rem 1.5rem 1.4rem;
+      margin: 1.3rem 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .formula-box .f-label {
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg);
+      box-shadow: var(--nm-flat);
+      border-radius: 100px;
+      padding: 2px 14px;
+      font-size: 0.61rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .formula {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent2);
+      letter-spacing: 0.3px;
+      line-height: 1.5;
+    }
+
+    /*** TABLE ***/
+    .nm-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin: 1.2rem 0;
+      font-size: 0.86rem;
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+    }
+
+    .nm-table thead tr {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nm-table th {
+      padding: 0.8rem 1.2rem;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .nm-table td {
+      padding: 0.7rem 1.2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text);
+      vertical-align: top;
+    }
+
+    .nm-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .nm-table tbody tr:hover td {
+      background: rgba(124, 106, 247, 0.05);
+    }
+
+    /*** CALLOUT ***/
+    .callout {
+      background: var(--bg);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      padding: 1.1rem 1.4rem;
+      margin: 1.2rem 0;
+      font-size: 0.87rem;
+      line-height: 1.72;
+      border-left: 3px solid;
+    }
+
+    .callout-title {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .callout.note {
+      border-color: var(--accent4);
+    }
+
+    .callout.note .callout-title {
+      color: var(--accent4);
+    }
+
+    .callout.warn {
+      border-color: var(--accent5);
+    }
+
+    .callout.warn .callout-title {
+      color: var(--accent5);
+    }
+
+    .callout.danger {
+      border-color: var(--accent3);
+    }
+
+    .callout.danger .callout-title {
+      color: var(--accent3);
+    }
+
+    .callout.info {
+      border-color: var(--accent);
+    }
+
+    .callout.info .callout-title {
+      color: var(--accent);
+    }
+
+    /*** CODE ***/
+    .code-block {
+      background: var(--bg-dark);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      padding: 1.3rem 1.5rem;
+      margin: 1.2rem 0;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .code-lang {
+      position: absolute;
+      top: 8px;
+      right: 14px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .code-block code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.83rem;
+      line-height: 1.75;
+      color: #9da4d8;
+      white-space: pre;
+      display: block;
+    }
+
+    .code-block code .kw {
+      color: var(--accent);
+    }
+
+    .code-block code .fn {
+      color: var(--accent2);
+    }
+
+    .code-block code .st {
+      color: var(--accent4);
+    }
+
+    .code-block code .cm {
+      color: #4a4d65;
+      font-style: italic;
+    }
+
+    /*** PIPELINE ***/
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 1.8rem auto;
+      max-width: 380px;
+    }
+
+    .p-step {
+      width: 100%;
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      border-radius: 10px;
+      padding: 0.6rem 1.2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .p-step:hover {
+      box-shadow: var(--nm-in);
+      color: var(--accent);
+    }
+
+    .p-step.hl {
+      box-shadow: var(--nm-in);
+      color: var(--accent);
+    }
+
+    .p-step.hl2 {
+      box-shadow: var(--nm-in);
+      color: var(--accent2);
+    }
+
+    .p-step.hl3 {
+      box-shadow: var(--nm-in);
+      color: var(--accent3);
+    }
+
+    .p-arrow {
+      width: 1px;
+      height: 16px;
+      background: linear-gradient(180deg, rgba(124, 106, 247, 0.4), rgba(79, 195, 247, 0.4));
+      margin: 2px auto;
+    }
+
+    /*** FOLDER TREE ***/
+    .folder-tree {
+      background: var(--bg-dark);
+      box-shadow: var(--nm-in);
+      border-radius: var(--r-sm);
+      padding: 1.3rem 1.8rem;
+      margin: 1.2rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.83rem;
+      line-height: 2;
+      color: #5a5e7a;
+    }
+
+    .folder-tree .folder {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .folder-tree .file {
+      color: var(--accent4);
+    }
+
+    /*** BENEFIT GRID ***/
+    .b-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin: 1.2rem 0;
+    }
+
+    .b-card {
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      border-radius: var(--r-sm);
+      padding: 1.3rem 1rem;
+      text-align: center;
+      transition: all 0.25s;
+    }
+
+    .b-card:hover {
+      box-shadow: var(--nm-in);
+    }
+
+    .b-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .b-card h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 0.35rem;
+    }
+
+    .b-card p {
+      font-size: 0.73rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /*** PAGE NUM ***/
+    .pg-num {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+      letter-spacing: 1px;
+    }
+
+    /*** SCROLL TOP ***/
+    #scroll-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    #scroll-top:hover {
+      box-shadow: var(--nm-in);
+    }
+
+    /*** RESPONSIVE ***/
+    @media (max-width: 760px) {
+      #sidebar {
+        transform: translateX(-100%);
+      }
+
+      #main {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== VERTICAL SIDEBAR ===== -->
+  <nav id="sidebar">
+    <div class="side-brand">
+      <div class="brand-orb">📘</div>
+      <div class="brand-text">MLOps Framework</div>
+      <div class="brand-sub">Technical Reference · 2026</div>
+    </div>
+
+    <div class="nav-section-label">Documentation</div>
+    <a class="nav-link active" href="#intro">
+      <span class="nav-icon">🏠</span> Introduction <span class="nav-num">01</span>
+    </a>
+    <a class="nav-link" href="#lifecycle">
+      <span class="nav-icon">🔄</span> Lifecycle <span class="nav-num">02</span>
+    </a>
+
+    <div class="nav-section-label">Metrics</div>
+    <a class="nav-link" href="#metrics">
+      <span class="nav-icon">📊</span> MAPE &amp; WAPE <span class="nav-num">03</span>
+    </a>
+
+    <div class="nav-section-label">Explainability</div>
+    <a class="nav-link" href="#shap">
+      <span class="nav-icon">🔍</span> SHAP <span class="nav-num">04</span>
+    </a>
+
+    <div class="nav-section-label">Infrastructure</div>
+    <a class="nav-link" href="#mlflow">
+      <span class="nav-icon">📝</span> MLflow <span class="nav-num">05</span>
+    </a>
+    <a class="nav-link" href="#airflow">
+      <span class="nav-icon">⚙️</span> Airflow <span class="nav-num">06</span>
+    </a>
+
+    <div class="nav-section-label">Operations</div>
+    <a class="nav-link" href="#monitoring">
+      <span class="nav-icon">📡</span> Monitoring <span class="nav-num">07</span>
+    </a>
+    <a class="nav-link" href="#pipeline">
+      <span class="nav-icon">🗂️</span> Pipeline <span class="nav-num">08</span>
+    </a>
+    <a class="nav-link" href="#conclusion">
+      <span class="nav-icon">✅</span> Conclusion <span class="nav-num">09</span>
+    </a>
+
+    <div class="side-footer">
+      <div class="side-badge">
+        <strong>v1.0</strong> · March 2026<br />
+        General-Purpose Reusable<br />MLOps Architecture
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main">
+    <div class="content-inner">
+
+      <!-- COVER -->
+      <div class="nm-cover" id="top">
+        <div class="cover-icon">🧠</div>
+        <div class="cover-badge">✦ Standardized MLOps Framework ✦</div>
+        <h1>MAPE · WAPE · SHAP<br /><span>MLflow</span> &amp; Airflow</h1>
+        <p class="sub">Integration of Performance Metrics, Explainability &amp; Orchestration<br />Production-Grade
+          Intelligent System Architecture</p>
+        <div class="chip-row">
+          <span class="chip">MAPE</span>
+          <span class="chip">WAPE</span>
+          <span class="chip">SHAP</span>
+          <span class="chip">MLflow</span>
+          <span class="chip">Airflow</span>
+          <span class="chip">Governance</span>
+          <span class="chip">Monitoring</span>
+          <span class="chip">Drift Detection</span>
+        </div>
+        <div class="stats-row">
+          <div class="stat-pill"><span class="stat-val">5</span><span class="stat-lbl">Core Components</span></div>
+          <div class="stat-pill"><span class="stat-val">9</span><span class="stat-lbl">DAG Stages</span></div>
+          <div class="stat-pill"><span class="stat-val">∞</span><span class="stat-lbl">Continuous Loop</span></div>
+        </div>
+      </div>
+
+      <!-- SECTION 1 -->
+      <div class="nm-card c-purple" id="intro">
+        <div class="sec-label purple">Section 01</div>
+        <div class="sec-title">Introduction</div>
+        <div class="sec-divider"></div>
+        <p>Modern Machine Learning systems must satisfy five core principles to be considered <strong>production-grade
+            intelligent systems</strong>:</p>
+        <ul>
+          <li><strong>Accuracy</strong> — Measurable performance aligned to business KPIs</li>
+          <li><strong>Interpretability</strong> — Stakeholders must understand model decisions</li>
+          <li><strong>Reproducibility</strong> — Experiments must be auditable and repeatable</li>
+          <li><strong>Automation</strong> — Lifecycle managed without manual intervention</li>
+          <li><strong>Continuous Monitoring</strong> — Drift detected proactively in production</li>
+        </ul>
+        <h3 class="sub"><span class="dot"></span>Framework Components</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Purpose</th>
+              <th>Role in Lifecycle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">MAPE</strong></td>
+              <td>Accuracy measurement</td>
+              <td>Evaluation &amp; Monitoring</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">WAPE</strong></td>
+              <td>Business-stable performance</td>
+              <td>Evaluation &amp; Monitoring</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">SHAP</strong></td>
+              <td>Interpretability &amp; drift detection</td>
+              <td>Explainability &amp; Monitoring</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent5)">MLflow</strong></td>
+              <td>Tracking &amp; model registry</td>
+              <td>Governance &amp; Reproducibility</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">Airflow</strong></td>
+              <td>Orchestration &amp; automation</td>
+              <td>Scheduling &amp; Retraining</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pg-num">— 01 —</div>
+      </div>
+
+      <!-- SECTION 2 -->
+      <div class="nm-card c-cyan" id="lifecycle">
+        <div class="sec-label cyan">Section 02</div>
+        <div class="sec-title">End-to-End MLOps Lifecycle</div>
+        <div class="sec-divider"></div>
+        <p><strong>Airflow</strong> orchestrates every stage. <strong>MLflow</strong> tracks all experiments and models
+          throughout.</p>
+        <div class="pipeline">
+          <div class="p-step">🏢 Business Understanding</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">📥 Data Ingestion</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">✅ Data Validation</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">🧠 Model Training</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl">📊 Model Evaluation (MAPE, WAPE)</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl3">🔍 Explainability (SHAP)</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl2">📝 MLflow Logging</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">🔐 Model Approval Gate</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl2">📦 Model Registry</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">🚀 Deployment</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl">📡 Monitoring (Performance + SHAP Drift)</div>
+          <div class="p-arrow"></div>
+          <div class="p-step hl3">🔄 Retraining Trigger</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">♻️ Continuous Loop</div>
+        </div>
+        <div class="pg-num">— 02 —</div>
+      </div>
+
+      <!-- SECTION 3 -->
+      <div class="nm-card c-pink" id="metrics">
+        <div class="sec-label pink">Section 03</div>
+        <div class="sec-title">Performance Metrics</div>
+        <div class="sec-divider"></div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>3.1 —
+          Mean Absolute Percentage Error (MAPE)</h3>
+        <p>MAPE measures the per-observation percentage deviation of predictions from actual values.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — MAPE</div>
+          <div class="formula">MAPE = (1/n) × Σ |Actualᵢ − Predictedᵢ| / |Actualᵢ| × 100</div>
+        </div>
+        <div class="callout note">
+          <div class="callout-title">✔ Why MAPE?</div>
+          Easy to interpret · Percentage-based · Business-friendly · Unit-independent metric
+        </div>
+        <div class="callout warn">
+          <div class="callout-title">⚠ Limitations</div>
+          Undefined when Actual = 0 · Sensitive to near-zero values · Biased toward under-forecasting
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>3.2
+          —
+          Weighted Absolute Percentage Error (WAPE)</h3>
+        <p>WAPE calculates the aggregate absolute error as a proportion of total actual demand — robust to zero values.
+        </p>
+        <div class="formula-box">
+          <div class="f-label">Formula — WAPE</div>
+          <div class="formula">WAPE = Σ|Actual − Predicted| / Σ|Actual| × 100</div>
+        </div>
+        <div class="callout note">
+          <div class="callout-title">✔ When to Prefer WAPE</div>
+          Retail forecasting · Time-series demand · SKU-level forecasting · Intermittent demand data
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>3.3
+          —
+          Why Use Both?</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Measures</th>
+              <th>Strength</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">MAPE</strong></td>
+              <td>Per-observation % error</td>
+              <td>Local fairness</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">WAPE</strong></td>
+              <td>Business-level aggregate error</td>
+              <td>Global stability</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pg-num">— 03 —</div>
+      </div>
+
+      <!-- SECTION 4 -->
+      <div class="nm-card c-green" id="shap">
+        <div class="sec-label green">Section 04</div>
+        <div class="sec-title">SHAP for Explainability</div>
+        <div class="sec-divider"></div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>4.1
+          —
+          Mathematical Foundation</h3>
+        <p>SHAP (SHapley Additive exPlanations) is grounded in cooperative game theory. Every prediction is decomposed
+          into additive feature contributions:</p>
+        <div class="formula-box">
+          <div class="f-label">SHAP Additive Decomposition</div>
+          <div class="formula">f(x) = φ₀ + Σᵢ φᵢ</div>
+        </div>
+        <ul>
+          <li><strong>φ₀</strong> — Base value (expected model output over training data)</li>
+          <li><strong>φᵢ</strong> — Shapley value: contribution of feature <em>i</em></li>
+        </ul>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>4.2
+          —
+          Explainability Types</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Visualization</th>
+              <th>Use Case</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent2)">Global</strong></td>
+              <td>Summary plot, feature ranking</td>
+              <td>Model validation, governance</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">Local</strong></td>
+              <td>Waterfall plot, force plot</td>
+              <td>Single prediction explanation</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>4.3
+          —
+          Why SHAP?</h3>
+        <ul>
+          <li>Explains individual model predictions with mathematical guarantees</li>
+          <li>Detects feature leakage during validation</li>
+          <li>Builds stakeholder and regulatory trust</li>
+          <li>Enables drift detection via importance shifts</li>
+        </ul>
+
+        <div class="callout danger">
+          <div class="callout-title">⚠ SHAP is NOT Causal</div>
+          SHAP explains <em>how</em> the model uses features — not <em>what happens</em> if you change a real-world
+          feature. Causal inference requires A/B testing · DAGs · Propensity score matching · Do-calculus
+        </div>
+        <div class="pg-num">— 04 —</div>
+      </div>
+
+      <!-- SECTION 5 -->
+      <div class="nm-card c-amber" id="mlflow">
+        <div class="sec-label amber">Section 05</div>
+        <div class="sec-title">Integration with MLflow</div>
+        <div class="sec-divider"></div>
+        <p>MLflow acts as the <strong>tracking and governance layer</strong> for all experiments, artifacts, and
+          registered models.</p>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.1
+          —
+          Logging Metrics</h3>
+        <div class="code-block">
+          <div class="code-lang">Python</div>
+          <code><span class="cm"># Log both metrics inside an MLflow run</span>
+<span class="kw">with</span> mlflow.start_run():
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>, mape_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>, wape_value)</code>
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.2
+          —
+          Logging SHAP Artifacts</h3>
+        <div class="code-block">
+          <div class="code-lang">Python</div>
+          <code>mlflow.<span class="fn">log_artifact</span>(<span class="st">"shap_summary.png"</span>)
+mlflow.<span class="fn">log_artifact</span>(<span class="st">"waterfall_plot.png"</span>)</code>
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.3
+          —
+          Approval Tagging</h3>
+        <div class="code-block">
+          <div class="code-lang">Python</div>
+          <code>mlflow.<span class="fn">set_tag</span>(<span class="st">"evaluator_approved"</span>, <span class="kw">True</span>)
+mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,  <span class="st">"wape"</span>)</code>
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.4
+          —
+          Model Registration Gate</h3>
+        <div class="callout info">
+          <div class="callout-title">📦 All Conditions Must Pass</div>
+          ✔ WAPE ≤ threshold &nbsp;·&nbsp; ✔ SHAP validated &nbsp;·&nbsp; ✔ evaluator_approved = True<br />
+          <em>Only then is the model registered in the MLflow Model Registry.</em>
+        </div>
+        <div class="pg-num">— 05 —</div>
+      </div>
+
+      <!-- SECTION 6 -->
+      <div class="nm-card c-purple" id="airflow">
+        <div class="sec-label purple">Section 06</div>
+        <div class="sec-title">Airflow Orchestration</div>
+        <div class="sec-divider"></div>
+        <p>Apache Airflow automates the entire ML lifecycle via <strong>DAGs</strong>, providing dependency control,
+          scheduling, retries, and monitoring.</p>
+        <h3 class="sub"><span class="dot"></span>6.1 — DAG Stage Breakdown</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>DAG Task</th>
+              <th>Responsibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Data Ingestion</td>
+              <td>Pull from source systems, validate schema</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Data Validation</td>
+              <td>Nulls, distributions, outlier checks</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>Model Training</td>
+              <td>Run training with configured hyperparameters</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Evaluation Task</td>
+              <td>Compute MAPE &amp; WAPE, log to MLflow</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>SHAP Analysis</td>
+              <td>Generate SHAP plots, log artifacts</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Approval Check</td>
+              <td>Gate — verify thresholds &amp; evaluator tag</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Model Registration</td>
+              <td>Push to MLflow Model Registry</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Deployment</td>
+              <td>Serve model to production endpoint</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout note">
+          <div class="callout-title">✔ Airflow Guarantees</div>
+          Cron scheduling · Dependency enforcement · Automatic retry logic · Retraining automation via sensors
+        </div>
+        <div class="pg-num">— 06 —</div>
+      </div>
+
+      <!-- SECTION 7 -->
+      <div class="nm-card c-cyan" id="monitoring">
+        <div class="sec-label cyan">Section 07</div>
+        <div class="sec-title">Monitoring Architecture</div>
+        <div class="sec-divider"></div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.1
+          —
+          Performance Monitoring</h3>
+        <p>Periodically recompute MAPE and WAPE on live production data. Threshold breach triggers the automated
+          retraining DAG.</p>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.2
+          —
+          SHAP Drift Monitoring</h3>
+        <ol>
+          <li>Compute SHAP on training baseline and store importance scores</li>
+          <li>Compute SHAP on current production data</li>
+          <li>Compare distributions using KL divergence or PSI</li>
+        </ol>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.3
+          —
+          Drift Matrix</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Scenario</th>
+              <th>MAPE</th>
+              <th>SHAP</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent5)">Model Aging</strong></td>
+              <td>↑ Rising</td>
+              <td>Stable</td>
+              <td>Data drifted, retrain on recent data</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">Concept Drift</strong></td>
+              <td>↑ Rising</td>
+              <td>Changed</td>
+              <td>Patterns shifted, investigate features</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">Early Warning</strong></td>
+              <td>Stable</td>
+              <td>Changed</td>
+              <td>Pre-degradation — act proactively</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">Healthy</strong></td>
+              <td>Stable</td>
+              <td>Stable</td>
+              <td>Operating within acceptable bounds</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.4
+          —
+          Retraining Trigger</h3>
+        <div class="callout danger">
+          <div class="callout-title">🔄 Airflow Fires Retraining DAG If ANY Condition Is True</div>
+          &nbsp;• MAPE &gt; threshold<br />
+          &nbsp;• WAPE &gt; threshold<br />
+          &nbsp;• SHAP drift score &gt; threshold
+        </div>
+        <div class="pg-num">— 07 —</div>
+      </div>
+
+      <!-- SECTION 8 -->
+      <div class="nm-card c-green" id="pipeline">
+        <div class="sec-label green">Section 08</div>
+        <div class="sec-title">Generalized Reusable Pipeline</div>
+        <div class="sec-divider"></div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>8.1
+          —
+          Project Structure</h3>
+        <div class="folder-tree">
+          <span class="folder">/mlops_framework/</span><br />
+          &nbsp;&nbsp;├── <span class="folder">data/</span><br />
+          &nbsp;&nbsp;├── <span class="folder">training/</span><br />
+          &nbsp;&nbsp;├── <span class="folder">evaluation/</span><br />
+          &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">metrics.py</span><br />
+          &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="file">shap_analysis.py</span><br />
+          &nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span class="file">approval_config.yaml</span><br />
+          &nbsp;&nbsp;├── <span class="folder">monitoring/</span><br />
+          &nbsp;&nbsp;├── <span class="folder">deployment/</span><br />
+          &nbsp;&nbsp;└── <span class="folder">mlruns/</span>
+        </div>
+        <p style="color:var(--text-dim);font-size:0.82rem;">Compatible with: Regression · Time-series · Classification ·
+          Tree-based · Deep learning</p>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>8.2
+          —
+          Framework Benefits</h3>
+        <div class="b-grid">
+          <div class="b-card">
+            <div class="b-icon">📐</div>
+            <h4>Standardized Policy</h4>
+            <p>Consistent evaluation across all projects</p>
+          </div>
+          <div class="b-card">
+            <div class="b-icon">🔍</div>
+            <h4>Explainable AI</h4>
+            <p>SHAP for every model in registry</p>
+          </div>
+          <div class="b-card">
+            <div class="b-icon">⚙️</div>
+            <h4>Automated Lifecycle</h4>
+            <p>Zero manual steps end-to-end</p>
+          </div>
+          <div class="b-card">
+            <div class="b-icon">📉</div>
+            <h4>Reduced Risk</h4>
+            <p>Dual-metric threshold gating</p>
+          </div>
+          <div class="b-card">
+            <div class="b-icon">♻️</div>
+            <h4>Reproducibility</h4>
+            <p>Every run fully tracked in MLflow</p>
+          </div>
+          <div class="b-card">
+            <div class="b-icon">📡</div>
+            <h4>Drift-Aware</h4>
+            <p>SHAP + metric monitoring loop</p>
+          </div>
+        </div>
+        <div class="pg-num">— 08 —</div>
+      </div>
+
+      <!-- SECTION 9 -->
+      <div class="nm-card c-purple" id="conclusion">
+        <div class="sec-label purple">Section 09</div>
+        <div class="sec-title">Final Conclusion</div>
+        <div class="sec-divider"></div>
+        <p>By integrating the five pillars of this framework:</p>
+        <ul>
+          <li><strong style="color:var(--accent)">MAPE</strong> → Prediction accuracy at observation level</li>
+          <li><strong style="color:var(--accent2)">WAPE</strong> → Business-level stability and aggregate error</li>
+          <li><strong style="color:var(--accent3)">SHAP</strong> → Explainability and pre-drift early warning</li>
+          <li><strong style="color:var(--accent5)">MLflow</strong> → Experiment tracking, registry, and governance</li>
+          <li><strong style="color:var(--accent4)">Airflow</strong> → Full lifecycle automation and orchestration</li>
+        </ul>
+        <div class="callout info" style="margin-top:1.5rem;">
+          <div class="callout-title">✅ Outcome</div>
+          We transform a machine learning model into a <strong>continuous, explainable, monitored, and production-grade
+            intelligent system</strong> — aligned to both technical rigor and real-world business requirements.
+        </div>
+        <div class="pg-num">— 09 —</div>
+      </div>
+
+    </div><!-- /content-inner -->
+  </main>
+
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+  <script>
+    // Active nav link on scroll
+    const sections = document.querySelectorAll('[id]');
+    const links = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(s => {
+        if (window.scrollY >= s.offsetTop - 120) current = s.id;
+      });
+      links.forEach(l => {
+        l.classList.remove('active');
+        if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+      });
+    });
+  </script>
+</body>
+
+</html>
