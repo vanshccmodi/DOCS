@@ -9,6 +9,10 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
     rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false})"></script>
   <style>
     /*** RESET ***/
     *,
@@ -21,6 +25,19 @@
 
     html {
       scroll-behavior: smooth;
+    }
+
+    /*** TEXT SELECTION ***/
+    ::selection {
+      background: rgba(124, 106, 247, 0.35);
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(124, 106, 247, 0.8);
+    }
+
+    ::-moz-selection {
+      background: rgba(124, 106, 247, 0.35);
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(124, 106, 247, 0.8);
     }
 
     /*** NEUMORPHISM TOKENS ***/
@@ -470,15 +487,15 @@
       color: #d8daf8;
     }
 
-    /*** FORMULA ***/
     .formula-box {
       background: var(--bg);
       box-shadow: var(--nm-in);
       border-radius: var(--r-sm);
-      padding: 1.6rem 1.5rem 1.4rem;
+      padding: 2rem 1.5rem 1.6rem;
       margin: 1.3rem 0;
       text-align: center;
       position: relative;
+      overflow: visible;
     }
 
     .formula-box .f-label {
@@ -497,12 +514,34 @@
     }
 
     .formula {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--accent2);
-      letter-spacing: 0.3px;
-      line-height: 1.5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* KaTeX overrides for dark theme */
+    .katex {
+      font-size: 1.25rem !important;
+      color: var(--accent2) !important;
+    }
+
+    .katex .mord,
+    .katex .mbin,
+    .katex .mrel,
+    .katex .mopen,
+    .katex .mclose,
+    .katex .mpunct,
+    .katex .minner {
+      color: var(--accent2) !important;
+    }
+
+    .katex .mfrac .frac-line {
+      border-color: var(--accent2) !important;
+    }
+
+    .katex .sqrt>.root,
+    .katex .sqrt .sqrt-sign {
+      color: var(--accent2) !important;
     }
 
     /*** TABLE ***/
@@ -1059,7 +1098,7 @@
           pure error magnitude in original units.</p>
         <div class="formula-box">
           <div class="f-label">Formula — MAE</div>
-          <div class="formula">MAE = (1/n) × Σ |Actualᵢ − Predictedᵢ|</div>
+          <div class="formula">$$\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}\left|A_i - P_i\right|$$</div>
         </div>
         <div class="callout note">
           <div class="callout-title">✔ Why MAE During Training?</div>
@@ -1073,7 +1112,7 @@
           — critical when outlier forecasts carry operational risk.</p>
         <div class="formula-box">
           <div class="f-label">Formula — RMSE</div>
-          <div class="formula">RMSE = √[ (1/n) × Σ (Actualᵢ − Predictedᵢ)² ]</div>
+          <div class="formula">$$\text{RMSE} = \sqrt{\frac{1}{n}\sum_{i=1}^{n}\left(A_i - P_i\right)^2}$$</div>
         </div>
         <div class="callout note">
           <div class="callout-title">✔ Why RMSE During Training?</div>
@@ -1086,7 +1125,8 @@
           and the standard business KPI in retail/supply-chain forecasting.</p>
         <div class="formula-box">
           <div class="f-label">Formula — WAPE</div>
-          <div class="formula">WAPE = Σ|Actual − Predicted| / Σ|Actual| × 100</div>
+          <div class="formula">$$\text{WAPE} = \frac{\sum_{i=1}^{n}\left|A_i -
+            P_i\right|}{\sum_{i=1}^{n}\left|A_i\right|} \times 100$$</div>
         </div>
         <div class="callout note">
           <div class="callout-title">✔ When to Prefer WAPE</div>
@@ -1103,7 +1143,8 @@
           time or degrading in specific periods.</p>
         <div class="formula-box">
           <div class="f-label">Formula — Rolling WAPE (window w)</div>
-          <div class="formula">WAPE_t = Σ|A − P| over [t−w, t] / Σ|A| over [t−w, t] × 100</div>
+          <div class="formula">$$\text{WAPE}_t = \frac{\sum_{k=t-w}^{t}\left|A_k -
+            P_k\right|}{\sum_{k=t-w}^{t}\left|A_k\right|} \times 100$$</div>
         </div>
         <div class="callout note">
           <div class="callout-title">✔ Why Rolling WAPE During Validation?</div>
@@ -1127,7 +1168,7 @@
           under-forecasting. A model with low RMSE but high bias is dangerous in inventory planning.</p>
         <div class="formula-box">
           <div class="f-label">Formula — Mean Error (Bias)</div>
-          <div class="formula">ME = (1/n) × Σ (Predictedᵢ − Actualᵢ)</div>
+          <div class="formula">$$\text{ME} = \frac{1}{n}\sum_{i=1}^{n}\left(P_i - A_i\right)$$</div>
         </div>
         <table class="nm-table">
           <thead>
@@ -1168,7 +1209,8 @@
           WAPE as a secondary business-facing metric.</p>
         <div class="formula-box">
           <div class="f-label">Formula — MAPE</div>
-          <div class="formula">MAPE = (1/n) × Σ |Actualᵢ − Predictedᵢ| / |Actualᵢ| × 100</div>
+          <div class="formula">$$\text{MAPE} = \frac{1}{n}\sum_{i=1}^{n}\left|\frac{A_i - P_i}{A_i}\right| \times 100$$
+          </div>
         </div>
         <div class="callout warn">
           <div class="callout-title">⚠ Limitations</div>
@@ -1181,7 +1223,7 @@
           outperforms a simple persistence forecast.</p>
         <div class="formula-box">
           <div class="f-label">Formula — MASE</div>
-          <div class="formula">MASE = MAE_model / MAE_naïve</div>
+          <div class="formula">$$\text{MASE} = \frac{\text{MAE}_{\text{model}}}{\text{MAE}_{\text{naïve}}}$$</div>
         </div>
         <div class="callout note">
           <div class="callout-title">✔ Why MASE?</div>
@@ -1263,7 +1305,7 @@
           into additive feature contributions:</p>
         <div class="formula-box">
           <div class="f-label">SHAP Additive Decomposition</div>
-          <div class="formula">f(x) = φ₀ + Σᵢ φᵢ</div>
+          <div class="formula">$$f(x) = \phi_0 + \sum_{i=1}^{M} \phi_i$$</div>
         </div>
         <ul>
           <li><strong>φ₀</strong> — Base value (expected model output over training data)</li>
