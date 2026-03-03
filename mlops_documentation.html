@@ -830,7 +830,7 @@
 
     <div class="nav-section-label">Metrics</div>
     <a class="nav-link" href="#metrics">
-      <span class="nav-icon">📊</span> MAPE &amp; WAPE <span class="nav-num">03</span>
+      <span class="nav-icon">📊</span> Evaluation Metrics <span class="nav-num">03</span>
     </a>
 
     <div class="nav-section-label">Explainability</div>
@@ -963,7 +963,7 @@
           <div class="p-arrow"></div>
           <div class="p-step">🧠 Model Training</div>
           <div class="p-arrow"></div>
-          <div class="p-step hl">📊 Model Evaluation (MAPE, WAPE)</div>
+          <div class="p-step hl">📊 Model Evaluation (MAE · RMSE · MAPE · WAPE)</div>
           <div class="p-arrow"></div>
           <div class="p-step hl3">🔍 Explainability (SHAP)</div>
           <div class="p-arrow"></div>
@@ -987,30 +987,49 @@
       <!-- SECTION 3 -->
       <div class="nm-card c-pink" id="metrics">
         <div class="sec-label pink">Section 03</div>
-        <div class="sec-title">Performance Metrics</div>
+        <div class="sec-title">Evaluation Metrics Stack</div>
         <div class="sec-divider"></div>
 
-        <h3 class="sub"><span class="dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>3.1 —
-          Mean Absolute Percentage Error (MAPE)</h3>
-        <p>MAPE measures the per-observation percentage deviation of predictions from actual values.</p>
+        <p>MAPE and WAPE alone are <strong>not sufficient</strong> for production-grade time-series forecasting. A
+          complete evaluation stack covers percentage error, absolute error, squared error, bias, baseline comparison,
+          and stability — each applied at the right <strong>pipeline stage</strong>.</p>
+
+        <!-- ─── STAGE A: TRAINING ─── -->
+        <h3 class="sub"><span class="dot"
+            style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>Stage A — During Training</h3>
+
+        <h3 class="sub" style="margin-top:1rem;"><span class="dot"
+            style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>3.1 — Mean Absolute Error (MAE)
+        </h3>
+        <p>The average absolute difference between predicted and actual values. Scale-dependent but easy to interpret as
+          pure error magnitude in original units.</p>
         <div class="formula-box">
-          <div class="f-label">Formula — MAPE</div>
-          <div class="formula">MAPE = (1/n) × Σ |Actualᵢ − Predictedᵢ| / |Actualᵢ| × 100</div>
+          <div class="f-label">Formula — MAE</div>
+          <div class="formula">MAE = (1/n) × Σ |Actualᵢ − Predictedᵢ|</div>
         </div>
         <div class="callout note">
-          <div class="callout-title">✔ Why MAPE?</div>
-          Easy to interpret · Percentage-based · Business-friendly · Unit-independent metric
-        </div>
-        <div class="callout warn">
-          <div class="callout-title">⚠ Limitations</div>
-          Undefined when Actual = 0 · Sensitive to near-zero values · Biased toward under-forecasting
+          <div class="callout-title">✔ Why MAE During Training?</div>
+          Directly optimisable · Robust to outliers · Same units as the target variable — makes training loss
+          interpretable
         </div>
 
         <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>3.2
-          —
-          Weighted Absolute Percentage Error (WAPE)</h3>
-        <p>WAPE calculates the aggregate absolute error as a proportion of total actual demand — robust to zero values.
-        </p>
+          — Root Mean Squared Error (RMSE)</h3>
+        <p>Squares each error before averaging, then takes the root. Large errors are penalised more heavily than in MAE
+          — critical when outlier forecasts carry operational risk.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — RMSE</div>
+          <div class="formula">RMSE = √[ (1/n) × Σ (Actualᵢ − Predictedᵢ)² ]</div>
+        </div>
+        <div class="callout note">
+          <div class="callout-title">✔ Why RMSE During Training?</div>
+          Penalises large spikes · Sensitive to outlier errors · Common benchmark for comparing model checkpoints
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>3.3
+          — Weighted Absolute Percentage Error (WAPE)</h3>
+        <p>WAPE calculates the aggregate absolute error as a proportion of total actual demand — robust to zero values
+          and the standard business KPI in retail/supply-chain forecasting.</p>
         <div class="formula-box">
           <div class="f-label">Formula — WAPE</div>
           <div class="formula">WAPE = Σ|Actual − Predicted| / Σ|Actual| × 100</div>
@@ -1020,27 +1039,157 @@
           Retail forecasting · Time-series demand · SKU-level forecasting · Intermittent demand data
         </div>
 
-        <h3 class="sub"><span class="dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>3.3
-          —
-          Why Use Both?</h3>
+        <!-- ─── STAGE B: VALIDATION ─── -->
+        <h3 class="sub" style="margin-top:2rem;"><span class="dot"
+            style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>Stage B — During Validation</h3>
+
+        <h3 class="sub" style="margin-top:1rem;"><span class="dot"
+            style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>3.4 — Rolling WAPE</h3>
+        <p>WAPE computed over a sliding window (e.g., 4-week rolling). Reveals whether forecast quality is stable over
+          time or degrading in specific periods.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — Rolling WAPE (window w)</div>
+          <div class="formula">WAPE_t = Σ|A − P| over [t−w, t] / Σ|A| over [t−w, t] × 100</div>
+        </div>
+        <div class="callout note">
+          <div class="callout-title">✔ Why Rolling WAPE During Validation?</div>
+          Detects seasonality-specific degradation · Avoids masking errors with overall aggregate · Mirrors production
+          monitoring
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>3.5
+          — RMSE (Validation Split)</h3>
+        <p>Running RMSE on the held-out validation set confirms whether the training-set RMSE is generalisable or the
+          model is overfitting to training noise.</p>
+        <div class="callout warn">
+          <div class="callout-title">⚠ Watch For</div>
+          A large gap between train-RMSE and val-RMSE signals overfitting — trigger regularisation or reduce model
+          complexity
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>3.6
+          — Bias / Mean Error</h3>
+        <p>Mean Error (ME) captures the <em>direction</em> of error — whether the model is systematically over- or
+          under-forecasting. A model with low RMSE but high bias is dangerous in inventory planning.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — Mean Error (Bias)</div>
+          <div class="formula">ME = (1/n) × Σ (Predictedᵢ − Actualᵢ)</div>
+        </div>
         <table class="nm-table">
           <thead>
             <tr>
-              <th>Metric</th>
-              <th>Measures</th>
-              <th>Strength</th>
+              <th>ME Value</th>
+              <th>Meaning</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong style="color:var(--accent)">MAPE</strong></td>
-              <td>Per-observation % error</td>
-              <td>Local fairness</td>
+              <td><strong style="color:var(--accent3)">ME &gt; 0</strong></td>
+              <td>Over-forecasting</td>
+              <td>Check feature scaling / target leakage</td>
             </tr>
             <tr>
-              <td><strong style="color:var(--accent2)">WAPE</strong></td>
-              <td>Business-level aggregate error</td>
-              <td>Global stability</td>
+              <td><strong style="color:var(--accent5)">ME &lt; 0</strong></td>
+              <td>Under-forecasting</td>
+              <td>Review trend component or differencing</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">ME ≈ 0</strong></td>
+              <td>Unbiased</td>
+              <td>Healthy — proceed to deployment gate</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ─── STAGE C: ADDITIONAL ─── -->
+        <h3 class="sub" style="margin-top:2rem;"><span class="dot"
+            style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>Stage C — Supplementary Metrics
+        </h3>
+
+        <h3 class="sub" style="margin-top:1rem;"><span class="dot"
+            style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>3.7 — Mean Absolute Percentage
+          Error (MAPE)</h3>
+        <p>MAPE measures the per-observation percentage deviation of predictions from actual values. Best used alongside
+          WAPE as a secondary business-facing metric.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — MAPE</div>
+          <div class="formula">MAPE = (1/n) × Σ |Actualᵢ − Predictedᵢ| / |Actualᵢ| × 100</div>
+        </div>
+        <div class="callout warn">
+          <div class="callout-title">⚠ Limitations</div>
+          Undefined when Actual = 0 · Sensitive to near-zero values · Biased toward under-forecasting
+        </div>
+
+        <h3 class="sub"><span class="dot" style="background:var(--accent3);box-shadow:0 0 8px var(--accent3)"></span>3.8
+          — MASE (Baseline Comparison)</h3>
+        <p>Mean Absolute Scaled Error compares model MAE against a naïve seasonal baseline. MASE &lt; 1 means the model
+          outperforms a simple persistence forecast.</p>
+        <div class="formula-box">
+          <div class="f-label">Formula — MASE</div>
+          <div class="formula">MASE = MAE_model / MAE_naïve</div>
+        </div>
+        <div class="callout note">
+          <div class="callout-title">✔ Why MASE?</div>
+          Scale-independent · Penalises failure to beat naive baseline · Essential for justifying model complexity to
+          stakeholders
+        </div>
+
+        <!-- ─── COMPLETE STACK SUMMARY ─── -->
+        <h3 class="sub" style="margin-top:2rem;"><span class="dot"
+            style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>Complete Evaluation Stack</h3>
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Metric</th>
+              <th>Category</th>
+              <th>Why Needed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="3" style="color:var(--accent5);font-weight:700;">Training</td>
+              <td><strong style="color:var(--accent)">MAE</strong></td>
+              <td>Absolute Error</td>
+              <td>Pure error magnitude in original units</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">RMSE</strong></td>
+              <td>Squared Error</td>
+              <td>Penalises large errors / spikes</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">WAPE</strong></td>
+              <td>Percentage Error</td>
+              <td>Business KPI — robust to zero values</td>
+            </tr>
+            <tr>
+              <td rowspan="3" style="color:var(--accent4);font-weight:700;">Validation</td>
+              <td><strong style="color:var(--accent)">Rolling WAPE</strong></td>
+              <td>Stability</td>
+              <td>Detects time-period degradation</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">RMSE (val)</strong></td>
+              <td>Generalisation</td>
+              <td>Overfitting check</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">Mean Error</strong></td>
+              <td>Bias</td>
+              <td>Detects over/under-prediction direction</td>
+            </tr>
+            <tr>
+              <td rowspan="2" style="color:var(--accent);font-weight:700;">Supplementary</td>
+              <td><strong style="color:var(--accent5)">MAPE</strong></td>
+              <td>Percentage Error</td>
+              <td>Per-observation % — business-friendly</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">MASE</strong></td>
+              <td>Baseline Comparison</td>
+              <td>Validates improvement over naïve forecast</td>
             </tr>
           </tbody>
         </table>
@@ -1123,10 +1272,19 @@
           Logging Metrics</h3>
         <div class="code-block">
           <div class="code-lang">Python</div>
-          <code><span class="cm"># Log both metrics inside an MLflow run</span>
+          <code><span class="cm"># Log full metric stack inside an MLflow run</span>
 <span class="kw">with</span> mlflow.start_run():
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>, mape_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>, wape_value)</code>
+    <span class="cm"># Training metrics</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mae"</span>,          mae_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>,         rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>,         wape_value)
+    <span class="cm"># Validation metrics</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rolling_wape"</span>, rolling_wape_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"val_rmse"</span>,     val_rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>,         mean_error_value)
+    <span class="cm"># Supplementary</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>,         mape_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mase"</span>,         mase_value)</code>
         </div>
 
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.2
@@ -1152,7 +1310,8 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
           Model Registration Gate</h3>
         <div class="callout info">
           <div class="callout-title">📦 All Conditions Must Pass</div>
-          ✔ WAPE ≤ threshold &nbsp;·&nbsp; ✔ SHAP validated &nbsp;·&nbsp; ✔ evaluator_approved = True<br />
+          ✔ WAPE ≤ threshold &nbsp;·&nbsp; ✔ RMSE within range &nbsp;·&nbsp; ✔ Bias (ME) ≈ 0<br />
+          ✔ MASE &lt; 1 &nbsp;·&nbsp; ✔ SHAP validated &nbsp;·&nbsp; ✔ evaluator_approved = True<br />
           <em>Only then is the model registered in the MLflow Model Registry.</em>
         </div>
         <div class="pg-num">— 05 —</div>
@@ -1193,7 +1352,7 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
             <tr>
               <td>4</td>
               <td>Evaluation Task</td>
-              <td>Compute MAPE &amp; WAPE, log to MLflow</td>
+              <td>Compute MAE · RMSE · WAPE · Bias · MASE, log to MLflow</td>
             </tr>
             <tr>
               <td>5</td>
@@ -1233,8 +1392,45 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
         <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.1
           —
           Performance Monitoring</h3>
-        <p>Periodically recompute MAPE and WAPE on live production data. Threshold breach triggers the automated
-          retraining DAG.</p>
+        <p>Periodically recompute the <strong>full metric stack</strong> on live production data. The primary production
+          signals are <strong>WAPE trend over time</strong>, <strong>RMSE</strong>, and <strong>Bias</strong> — a
+          threshold breach on any triggers the automated retraining DAG.</p>
+        <table class="nm-table" style="margin-top:0.8rem;">
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>Threshold Breach</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">WAPE (rolling)</strong></td>
+              <td>↑ Rising trend</td>
+              <td>Trigger retraining DAG</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">RMSE</strong></td>
+              <td>&gt; trained baseline</td>
+              <td>Investigate data quality / anomalies</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">Bias (ME)</strong></td>
+              <td>Persistently ≠ 0</td>
+              <td>Retrain with updated exogenous features</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">Data Drift</strong></td>
+              <td>PSI / KL divergence ↑</td>
+              <td>Re-validate features, repipeline data</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent5)">SHAP Shift</strong></td>
+              <td>Importance rank change</td>
+              <td>Pre-drift warning — act proactively</td>
+            </tr>
+          </tbody>
+        </table>
 
         <h3 class="sub"><span class="dot" style="background:var(--accent2);box-shadow:0 0 8px var(--accent2)"></span>7.2
           —
@@ -1290,9 +1486,11 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
           Retraining Trigger</h3>
         <div class="callout danger">
           <div class="callout-title">🔄 Airflow Fires Retraining DAG If ANY Condition Is True</div>
-          &nbsp;• MAPE &gt; threshold<br />
-          &nbsp;• WAPE &gt; threshold<br />
-          &nbsp;• SHAP drift score &gt; threshold
+          &nbsp;• Rolling WAPE trend rising beyond threshold<br />
+          &nbsp;• RMSE &gt; trained baseline threshold<br />
+          &nbsp;• Bias (Mean Error) persistently ≠ 0<br />
+          &nbsp;• Data drift detected (PSI / KL divergence)<br />
+          &nbsp;• SHAP feature importance distribution shifted
         </div>
         <div class="pg-num">— 07 —</div>
       </div>
@@ -1364,13 +1562,20 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
         <div class="sec-label purple">Section 09</div>
         <div class="sec-title">Final Conclusion</div>
         <div class="sec-divider"></div>
-        <p>By integrating the five pillars of this framework:</p>
+        <p>By integrating all pillars of this framework:</p>
         <ul>
-          <li><strong style="color:var(--accent)">MAPE</strong> → Prediction accuracy at observation level</li>
-          <li><strong style="color:var(--accent2)">WAPE</strong> → Business-level stability and aggregate error</li>
-          <li><strong style="color:var(--accent3)">SHAP</strong> → Explainability and pre-drift early warning</li>
-          <li><strong style="color:var(--accent5)">MLflow</strong> → Experiment tracking, registry, and governance</li>
-          <li><strong style="color:var(--accent4)">Airflow</strong> → Full lifecycle automation and orchestration</li>
+          <li><strong style="color:var(--accent)">MAE / RMSE</strong> → Pure error magnitude and outlier sensitivity
+            during training</li>
+          <li><strong style="color:var(--accent2)">WAPE / Rolling WAPE</strong> → Business-level aggregate error and
+            stability monitoring</li>
+          <li><strong style="color:var(--accent3)">Bias (ME) / MASE</strong> → Direction of error and baseline
+            comparison for validation</li>
+          <li><strong style="color:var(--accent5)">SHAP</strong> → Explainability, drift detection, and pre-degradation
+            early warning</li>
+          <li><strong style="color:var(--accent4)">MLflow</strong> → Experiment tracking, full metric registry, and
+            governance gate</li>
+          <li><strong style="color:var(--text-head)">Airflow</strong> → Full lifecycle automation and multi-signal
+            retraining orchestration</li>
         </ul>
         <div class="callout info" style="margin-top:1.5rem;">
           <div class="callout-title">✅ Outcome</div>
