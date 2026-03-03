@@ -1329,16 +1329,16 @@
           <code><span class="cm"># Log full metric stack inside an MLflow run</span>
 <span class="kw">with</span> mlflow.start_run():
     <span class="cm"># Training metrics</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"mae"</span>,          mae_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>,         rmse_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>,         wape_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mae"</span>, mae_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>, rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>, wape_value)
     <span class="cm"># Validation metrics</span>
     mlflow.<span class="fn">log_metric</span>(<span class="st">"rolling_wape"</span>, rolling_wape_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"val_rmse"</span>,     val_rmse_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>,         mean_error_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"val_rmse"</span>, val_rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>, mean_error_value)
     <span class="cm"># Supplementary</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>,         mape_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"mase"</span>,         mase_value)</code>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>, mape_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mase"</span>, mase_value)</code>
         </div>
 
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.2
@@ -1356,7 +1356,7 @@ mlflow.<span class="fn">log_artifact</span>(<span class="st">"waterfall_plot.png
         <div class="code-block">
           <div class="code-lang">Python</div>
           <code>mlflow.<span class="fn">set_tag</span>(<span class="st">"evaluator_approved"</span>, <span class="kw">True</span>)
-mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,  <span class="st">"wape"</span>)</code>
+mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>, <span class="st">"wape"</span>)</code>
         </div>
 
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.4
@@ -1687,8 +1687,8 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
 <span class="kw">from</span> airflow.operators.trigger_dagrun <span class="kw">import</span> TriggerDagRunOperator
 
 <span class="kw">def</span> <span class="fn">evaluate</span>(**ctx):
-    wape  = <span class="fn">compute_wape</span>(y_true, y_pred)
-    mape  = <span class="fn">compute_mape</span>(y_true, y_pred)
+    wape = <span class="fn">compute_wape</span>(y_true, y_pred)
+    mape = <span class="fn">compute_mape</span>(y_true, y_pred)
     ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'wape'</span>, wape)
     ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'mape'</span>, mape)
 
@@ -1699,7 +1699,7 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
 
 <span class="kw">def</span> <span class="fn">shap_analysis</span>(**ctx):
     shap_vals = <span class="fn">generate_shap</span>(model, X_val)
-    <span class="fn">save_shap_plots</span>(shap_vals)          <span class="cm"># saved as ML artifact</span>
+    <span class="fn">save_shap_plots</span>(shap_vals) <span class="cm"># saved as ML artifact</span>
     ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'shap_importance'</span>, shap_vals.<span class="fn">mean</span>(axis=0).<span class="fn">tolist</span>())
 
 <span class="cm"># DAG wiring</span>
@@ -1764,22 +1764,22 @@ t_train  &gt;&gt; t_evaluate &gt;&gt; t_shap &gt;&gt; t_gate &gt;&gt; t_register
           <code><span class="kw">with</span> mlflow.<span class="fn">start_run</span>(run_name=<span class="st">"sarimax_challenger_v3"</span>) <span class="kw">as</span> run:
 
     <span class="cm"># ── Metrics that Airflow approval_gate_task reads via MLflow API ──</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>,         wape_value)    <span class="cm"># primary gate signal</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>,         mape_value)    <span class="cm"># secondary business metric</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>,         rmse_value)
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"rolling_wape"</span>, rolling_wape)  <span class="cm"># monitoring baseline</span>
-    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>,         mean_error)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>, wape_value) <span class="cm"># primary gate signal</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>, mape_value) <span class="cm"># secondary business metric</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>, rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rolling_wape"</span>, rolling_wape) <span class="cm"># monitoring baseline</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>, mean_error)
 
     <span class="cm"># ── SHAP artifacts stored for audit and drift comparison ──</span>
     shap_vals = shap.<span class="fn">Explainer</span>(model)(X_val)
     shap.<span class="fn">summary_plot</span>(shap_vals, show=<span class="kw">False</span>)
     plt.<span class="fn">savefig</span>(<span class="st">"shap_summary.png"</span>)
-    mlflow.<span class="fn">log_artifact</span>(<span class="st">"shap_summary.png"</span>)    <span class="cm"># attached to this run</span>
+    mlflow.<span class="fn">log_artifact</span>(<span class="st">"shap_summary.png"</span>) <span class="cm"># attached to this run</span>
 
     <span class="cm"># ── Tags used by Airflow approval_gate to filter registry candidates ──</span>
     mlflow.<span class="fn">set_tag</span>(<span class="st">"evaluator_approved"</span>, wape_value &lt; WAPE_THRESHOLD)
-    mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,    <span class="st">"wape"</span>)
-    mlflow.<span class="fn">set_tag</span>(<span class="st">"shap_validated"</span>,    <span class="st">"True"</span>)
+    mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>, <span class="st">"wape"</span>)
+    mlflow.<span class="fn">set_tag</span>(<span class="st">"shap_validated"</span>, <span class="st">"True"</span>)
 
     <span class="cm"># ── Register only if fully approved ──</span>
     <span class="kw">if</span> wape_value &lt; WAPE_THRESHOLD:
