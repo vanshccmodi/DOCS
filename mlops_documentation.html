@@ -807,10 +807,61 @@
         margin-left: 0;
       }
     }
+
+    /*** CREATED BY BADGE ***/
+    #created-by {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 2rem;
+      background: var(--bg);
+      box-shadow: var(--nm-out);
+      border-radius: 100px;
+      padding: 0.45rem 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.3px;
+      z-index: 50;
+      transition: box-shadow 0.3s, color 0.3s;
+      white-space: nowrap;
+    }
+
+    #created-by:hover {
+      box-shadow: var(--nm-in);
+      color: var(--text);
+    }
+
+    #created-by .cb-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      flex-shrink: 0;
+    }
+
+    #created-by strong {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /*** CANVAS PARTICLE TRAIL ***/
+    #trail-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- canvas particle trail -->
+  <canvas id="trail-canvas"></canvas>
 
   <!-- ===== VERTICAL SIDEBAR ===== -->
   <nav id="sidebar">
@@ -1590,8 +1641,13 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
 
   <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
 
+  <div id="created-by">
+    <span class="cb-dot"></span>
+    Created by <strong>Wormbyte</strong>
+  </div>
+
   <script>
-    // Active nav link on scroll
+    // ── Active nav link on scroll ──
     const sections = document.querySelectorAll('[id]');
     const links = document.querySelectorAll('.nav-link');
     window.addEventListener('scroll', () => {
@@ -1604,6 +1660,65 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
         if (l.getAttribute('href') === '#' + current) l.classList.add('active');
       });
     });
+
+    // ── Canvas particle trail ──
+    const canvas = document.getElementById('trail-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const palette = [
+      '124,106,247',
+      '100,120,255',
+      '79,195,247',
+      '150,80,255',
+      '79,195,247',
+    ];
+
+    function spawnParticles(x, y, count) {
+      for (let i = 0; i < count; i++) {
+        const color = palette[Math.floor(Math.random() * palette.length)];
+        particles.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 1.4,
+          vy: (Math.random() - 0.5) * 1.4 - 0.8,
+          r: Math.random() * 3 + 1.5,
+          alpha: 1,
+          decay: Math.random() * 0.025 + 0.018,
+          color,
+        });
+      }
+    }
+
+    document.addEventListener('mousemove', e => spawnParticles(e.clientX, e.clientY, 4));
+    document.addEventListener('click', e => spawnParticles(e.clientX, e.clientY, 20));
+
+    (function loop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles = particles.filter(p => p.alpha > 0.01);
+      for (const p of particles) {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.shadowColor = `rgba(${p.color},1)`;
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = `rgba(${p.color},${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        p.x += p.vx;
+        p.y += p.vy;
+        p.r *= 0.95;
+        p.alpha -= p.decay;
+      }
+      requestAnimationFrame(loop);
+    })();
   </script>
 </body>
 
