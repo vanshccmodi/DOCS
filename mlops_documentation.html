@@ -731,6 +731,28 @@
       color: var(--accent3);
     }
 
+    .p-step.hl-human {
+      box-shadow: var(--nm-in);
+      color: var(--accent5);
+      border: 1px solid rgba(255, 183, 77, 0.25);
+      position: relative;
+    }
+
+    .p-step.hl-human::after {
+      content: 'HUMAN LAYER';
+      position: absolute;
+      top: -9px;
+      right: 10px;
+      font-size: 0.48rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: var(--accent5);
+      background: var(--bg);
+      padding: 1px 8px;
+      border-radius: 100px;
+      box-shadow: 0 0 8px rgba(255, 183, 77, 0.3);
+    }
+
     .p-arrow {
       width: 1px;
       height: 16px;
@@ -1062,7 +1084,9 @@
           <div class="p-arrow"></div>
           <div class="p-step hl2">📝 MLflow Logging</div>
           <div class="p-arrow"></div>
-          <div class="p-step">🔐 Model Approval Gate</div>
+          <div class="p-step hl-human">� Human Review &amp; Sign-off</div>
+          <div class="p-arrow"></div>
+          <div class="p-step">🔐 Automated Metric Gate</div>
           <div class="p-arrow"></div>
           <div class="p-step hl2">📦 Model Registry</div>
           <div class="p-arrow"></div>
@@ -1405,10 +1429,18 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
           —
           Model Registration Gate</h3>
         <div class="callout info">
-          <div class="callout-title">📦 All Conditions Must Pass</div>
+          <div class="callout-title">📦 All Conditions Must Pass (Automated + Human)</div>
           ✔ WAPE ≤ threshold &nbsp;·&nbsp; ✔ RMSE within range &nbsp;·&nbsp; ✔ Bias (ME) ≈ 0<br />
           ✔ MASE &lt; 1 &nbsp;·&nbsp; ✔ SHAP validated &nbsp;·&nbsp; ✔ evaluator_approved = True<br />
+          <strong style="color:var(--accent5)">✔ Human reviewer sign-off tag set in MLflow</strong><br />
           <em>Only then is the model registered in the MLflow Model Registry.</em>
+        </div>
+        <div class="callout warn" style="margin-top:0.8rem;">
+          <div class="callout-title">👤 Human-in-the-Loop (HITL) Review</div>
+          Before automated registration, a <strong>Data Scientist or ML Engineer</strong> reviews the MLflow run —
+          checks SHAP plots for unexpected feature behaviour, validates business alignment of WAPE, and sets the <code
+            style="color:var(--accent2);font-family:'JetBrains Mono',monospace;">human_approved = True</code> tag. This
+          prevents regressions that pass metrics but fail business logic.
         </div>
         <div class="pg-num">— 05 —</div>
       </div>
@@ -1453,20 +1485,29 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
             <tr>
               <td>5</td>
               <td>SHAP Analysis</td>
-              <td>Generate SHAP plots, log artifacts</td>
+              <td>Generate SHAP plots, log artifacts to MLflow</td>
             </tr>
-            <tr>
-              <td>6</td>
-              <td>Approval Check</td>
-              <td>Gate — verify thresholds &amp; evaluator tag</td>
+            <tr style="background:rgba(255,183,77,0.05);">
+              <td><strong style="color:var(--accent5)">6</strong></td>
+              <td><strong style="color:var(--accent5)">👤 Human Review</strong></td>
+              <td>Data Scientist reviews MLflow run — inspects SHAP plots, validates business alignment, sets <code
+                  style="color:var(--accent2);font-family:'JetBrains Mono',monospace;">human_approved = True</code> tag
+              </td>
             </tr>
             <tr>
               <td>7</td>
+              <td>Automated Metric Gate</td>
+              <td>Airflow reads <code
+                  style="color:var(--accent2);font-family:'JetBrains Mono',monospace;">human_approved</code> + metric
+                thresholds — halts pipeline if any check fails</td>
+            </tr>
+            <tr>
+              <td>8</td>
               <td>Model Registration</td>
               <td>Push to MLflow Model Registry</td>
             </tr>
             <tr>
-              <td>8</td>
+              <td>9</td>
               <td>Deployment</td>
               <td>Serve model to production endpoint</td>
             </tr>
