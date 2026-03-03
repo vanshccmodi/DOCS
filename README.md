@@ -10,7 +10,7 @@
 | Page | URL |
 |---|---|
 | 📘 Technical Documentation | [mlops_documentation.html](https://vanshccmodi.github.io/DOCS/mlops_documentation.html) |
-| 🎯 Strategy Presentation | [mlops_presentation.html](https://vanshccmodi.github.io/DOCS/mlops_presentation.html) |
+| 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
 
 ---
 
@@ -21,21 +21,19 @@ A **Neumorphism**-styled, scrollable documentation page covering the entire MLOp
 
 **Sections covered:**
 - 📐 Framework Overview & Architecture
-- 📊 Evaluation Metrics — MAPE, WAPE, RMSE
+- 📊 Evaluation Metrics — MAE, RMSE, WAPE, Rolling WAPE, Bias, MASE, MAPE
 - 🌿 SHAP-based Explainability
 - 🧪 MLflow — Experiment Tracking & Model Registry
 - 🌀 Airflow — Pipeline Orchestration & DAG Design
-- 🐋 Docker — Containerisation Strategy
-- 🔁 CI/CD — GitHub Actions Pipelines
-- 🛡️ Model Governance & Rollback Procedures
+- ️ Model Governance & Rollback Procedures
 - 📡 Production Monitoring & Drift Detection
 
 **Design system:** Dark Neumorphism (`#1e2030` base, inset/outset shadows, `--accent: #7c6af7`) · Inter + JetBrains Mono fonts · Active-scroll sidebar nav
 
 ---
 
-### 2. `mlops_presentation.html` — Strategy Deck
-A **Claymorphism**-styled interactive presentation built for stakeholder and mentor walkthroughs.
+### 2. `pump_optimization.html` — Strategy Deck
+A **Claymorphism**-styled interactive presentation built for stakeholder and mentor walkthroughs, focused on the Smart Pump Monitoring / Ad Sales Forecasting system.
 
 **Sections covered:**
 - 🗂️ Dashboard & Tool Selection rationale
@@ -67,12 +65,12 @@ A **Claymorphism**-styled interactive presentation built for stakeholder and men
 
 ## 🎨 Design Highlights
 
-| | Documentation | Presentation |
+| | Documentation | Pump Optimization |
 |---|---|---|
 | **Style** | Neumorphism (Dark) | Claymorphism (Light + Dark toggle) |
 | **Font** | Inter + JetBrains Mono | Inter + Fira Code |
 | **Navigation** | Fixed sidebar with scroll-spy | Sidebar with section switching |
-| **Diagrams** | ASCII / HTML pipeline steps | Mermaid.js flowcharts |
+| **Diagrams** | HTML pipeline steps + tables | Mermaid.js flowcharts |
 | **Responsive** | ✅ | ✅ |
 
 ---
@@ -88,11 +86,11 @@ cd DOCS
 
 # Open in browser (Windows)
 start mlops_documentation.html
-start mlops_presentation.html
+start pump_optimization.html
 
 # Open in browser (macOS/Linux)
 open mlops_documentation.html
-open mlops_presentation.html
+open pump_optimization.html
 ```
 
 Or serve with any static file server:
@@ -109,7 +107,7 @@ npx serve .
 ```
 DOCS/
 ├── mlops_documentation.html   # Technical reference (Neumorphism)
-├── mlops_presentation.html    # Strategy deck (Claymorphism + dark mode)
+├── pump_optimization.html     # Strategy deck (Claymorphism + dark mode)
 └── README.md
 ```
 
