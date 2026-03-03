@@ -904,8 +904,11 @@
     <a class="nav-link" href="#pipeline">
       <span class="nav-icon">🗂️</span> Pipeline <span class="nav-num">08</span>
     </a>
+    <a class="nav-link" href="#tools-in-action">
+      <span class="nav-icon">🛠️</span> Tools in Action <span class="nav-num">09</span>
+    </a>
     <a class="nav-link" href="#conclusion">
-      <span class="nav-icon">✅</span> Conclusion <span class="nav-num">09</span>
+      <span class="nav-icon">✅</span> Conclusion <span class="nav-num">10</span>
     </a>
 
     <div class="side-footer">
@@ -939,7 +942,7 @@
         </div>
         <div class="stats-row">
           <div class="stat-pill"><span class="stat-val">5</span><span class="stat-lbl">Core Components</span></div>
-          <div class="stat-pill"><span class="stat-val">9</span><span class="stat-lbl">DAG Stages</span></div>
+          <div class="stat-pill"><span class="stat-val">10</span><span class="stat-lbl">Sections</span></div>
           <div class="stat-pill"><span class="stat-val">∞</span><span class="stat-lbl">Continuous Loop</span></div>
         </div>
       </div>
@@ -1608,9 +1611,225 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
         <div class="pg-num">— 08 —</div>
       </div>
 
-      <!-- SECTION 9 -->
+      <!-- SECTION 9 — TOOLS IN ACTION -->
+      <div class="nm-card c-amber" id="tools-in-action">
+        <div class="sec-label amber">Section 09</div>
+        <div class="sec-title">Airflow &amp; MLflow in Action</div>
+        <div class="sec-divider"></div>
+        <p>This section is <strong>tools-first</strong>, not tech-first. It shows exactly <em>what Airflow does</em> and
+          <em>what MLflow does</em> at every metric checkpoint — MAPE, WAPE, and SHAP — in the real pipeline workflow.
+        </p>
+
+        <!-- ─── HOW AIRFLOW USES THE METRICS ─── -->
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>
+          9.1 — How Airflow Uses MAPE, WAPE &amp; SHAP</h3>
+        <p>Airflow does <strong>not compute metrics itself</strong> — it <strong>schedules and sequences</strong> the
+          tasks
+          that produce them. Here is how each metric fits into the DAG as a concrete Airflow operator:</p>
+
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>DAG Task (Airflow Operator)</th>
+              <th>Metric Produced</th>
+              <th>What Airflow Does With It</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent5)">evaluate_model_task</strong></td>
+              <td>MAPE, WAPE, RMSE, Bias</td>
+              <td>Runs evaluation script, pushes results via XCom to the next task</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent)">approval_gate_task</strong></td>
+              <td>WAPE threshold check</td>
+              <td>Reads WAPE from XCom — if WAPE &gt; threshold, marks task <em>failed</em> and halts DAG; pipeline
+                stops
+                before registration</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">shap_analysis_task</strong></td>
+              <td>SHAP importance scores</td>
+              <td>Runs SHAP explainer, saves plots as artifacts, passes importance vector to monitoring sensor</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">monitoring_sensor_task</strong></td>
+              <td>Rolling WAPE, MAPE trend, SHAP shift</td>
+              <td>Runs on schedule (e.g., daily at 02:00); compares live metrics against stored baseline — triggers
+                retraining DAG if any threshold is breached</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">retrain_trigger_task</strong></td>
+              <td>MAPE rising / SHAP drift signal</td>
+              <td>Uses Airflow <code
+                  style="color:var(--accent2);font-family:'JetBrains Mono',monospace;">TriggerDagRunOperator</code>
+                to fire the full training DAG automatically — no manual step needed</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout note">
+          <div class="callout-title">🛠 Airflow Role Summary</div>
+          Airflow is the <strong>scheduler and gatekeeper</strong>. It decides <em>when</em> metrics are computed,
+          <em>whether</em> the pipeline proceeds based on WAPE/MAPE thresholds, and <em>if</em> retraining fires based
+          on SHAP drift or metric degradation. The metrics are the decision signals; Airflow acts on them.
+        </div>
+
+        <!-- ─── DAG CODE ─── -->
+        <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>
+          9.2 — Airflow DAG: Metric-Gated Pipeline</h3>
+        <div class="code-block">
+          <div class="code-lang">Python — Airflow DAG</div>
+          <code><span class="cm"># Airflow DAG — every task is metric-aware</span>
+<span class="kw">from</span> airflow <span class="kw">import</span> DAG
+<span class="kw">from</span> airflow.operators.python <span class="kw">import</span> PythonOperator, BranchPythonOperator
+<span class="kw">from</span> airflow.operators.trigger_dagrun <span class="kw">import</span> TriggerDagRunOperator
+
+<span class="kw">def</span> <span class="fn">evaluate</span>(**ctx):
+    wape  = <span class="fn">compute_wape</span>(y_true, y_pred)
+    mape  = <span class="fn">compute_mape</span>(y_true, y_pred)
+    ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'wape'</span>, wape)
+    ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'mape'</span>, mape)
+
+<span class="kw">def</span> <span class="fn">approval_gate</span>(**ctx):
+    wape = ctx[<span class="st">'ti'</span>].<span class="fn">xcom_pull</span>(task_ids=<span class="st">'evaluate'</span>, key=<span class="st">'wape'</span>)
+    <span class="kw">if</span> wape &gt; WAPE_THRESHOLD:
+        <span class="kw">raise</span> ValueError(<span class="st">f"WAPE {wape:.1f}% exceeds threshold — pipeline halted"</span>)
+
+<span class="kw">def</span> <span class="fn">shap_analysis</span>(**ctx):
+    shap_vals = <span class="fn">generate_shap</span>(model, X_val)
+    <span class="fn">save_shap_plots</span>(shap_vals)          <span class="cm"># saved as ML artifact</span>
+    ctx[<span class="st">'ti'</span>].<span class="fn">xcom_push</span>(<span class="st">'shap_importance'</span>, shap_vals.<span class="fn">mean</span>(axis=0).<span class="fn">tolist</span>())
+
+<span class="cm"># DAG wiring</span>
+t_train  &gt;&gt; t_evaluate &gt;&gt; t_shap &gt;&gt; t_gate &gt;&gt; t_register &gt;&gt; t_deploy</code>
+        </div>
+
+        <!-- ─── HOW MLFLOW USES THE METRICS ─── -->
+        <h3 class="sub"><span class="dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>
+          9.3 — How MLflow Uses MAPE, WAPE &amp; SHAP</h3>
+        <p>MLflow is the <strong>memory of the pipeline</strong> — it stores every metric, every artifact, and every
+          model version so the team can compare, audit, and reproduce any run. Here is what MLflow concretely does with
+          each metric:</p>
+
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>MLflow Feature Used</th>
+              <th>Metric / Artifact</th>
+              <th>What MLflow Stores / Enables</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent)">mlflow.log_metric()</strong></td>
+              <td>MAPE, WAPE, RMSE, Bias</td>
+              <td>Logs numeric values against the run ID — visible in the MLflow UI as time-series charts for every
+                experiment</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent2)">mlflow.log_artifact()</strong></td>
+              <td>SHAP summary plot, waterfall plot</td>
+              <td>Stores PNG/HTML SHAP visuals attached to the run — reviewable by any stakeholder without re-running
+                code</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent3)">mlflow.set_tag()</strong></td>
+              <td>WAPE approval flag, primary_metric</td>
+              <td>Tags the run with human-readable metadata — used by the approval gate to filter only
+                <em>evaluator_approved = True</em> runs for promotion
+              </td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent5)">Model Registry — Staging</strong></td>
+              <td>All thresholds passed (WAPE ✔ MAPE ✔ SHAP ✔)</td>
+              <td>Promotes the model from <em>None</em> → <em>Staging</em> state — only runs where every metric cleared
+                the gate can be registered</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent4)">Model Registry — Production</strong></td>
+              <td>Champion comparison (WAPE new &lt; WAPE old)</td>
+              <td>Airflow reads the registry, compares WAPE of the challenger vs. current champion, and transitions the
+                better model to <em>Production</em> automatically</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- ─── MLFLOW CODE ─── -->
+        <h3 class="sub"><span class="dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>
+          9.4 — MLflow Run: Metric + SHAP Logging</h3>
+        <div class="code-block">
+          <div class="code-lang">Python — MLflow Logging</div>
+          <code><span class="kw">with</span> mlflow.<span class="fn">start_run</span>(run_name=<span class="st">"sarimax_challenger_v3"</span>) <span class="kw">as</span> run:
+
+    <span class="cm"># ── Metrics that Airflow approval_gate_task reads via MLflow API ──</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"wape"</span>,         wape_value)    <span class="cm"># primary gate signal</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"mape"</span>,         mape_value)    <span class="cm"># secondary business metric</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rmse"</span>,         rmse_value)
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"rolling_wape"</span>, rolling_wape)  <span class="cm"># monitoring baseline</span>
+    mlflow.<span class="fn">log_metric</span>(<span class="st">"bias"</span>,         mean_error)
+
+    <span class="cm"># ── SHAP artifacts stored for audit and drift comparison ──</span>
+    shap_vals = shap.<span class="fn">Explainer</span>(model)(X_val)
+    shap.<span class="fn">summary_plot</span>(shap_vals, show=<span class="kw">False</span>)
+    plt.<span class="fn">savefig</span>(<span class="st">"shap_summary.png"</span>)
+    mlflow.<span class="fn">log_artifact</span>(<span class="st">"shap_summary.png"</span>)    <span class="cm"># attached to this run</span>
+
+    <span class="cm"># ── Tags used by Airflow approval_gate to filter registry candidates ──</span>
+    mlflow.<span class="fn">set_tag</span>(<span class="st">"evaluator_approved"</span>, wape_value &lt; WAPE_THRESHOLD)
+    mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,    <span class="st">"wape"</span>)
+    mlflow.<span class="fn">set_tag</span>(<span class="st">"shap_validated"</span>,    <span class="st">"True"</span>)
+
+    <span class="cm"># ── Register only if fully approved ──</span>
+    <span class="kw">if</span> wape_value &lt; WAPE_THRESHOLD:
+        mlflow.<span class="fn">register_model</span>(
+            model_uri=<span class="st">f"runs:/{run.info.run_id}/model"</span>,
+            name=<span class="st">"forecasting_model"</span>
+        )</code>
+        </div>
+
+        <!-- ─── COMBINED FLOW ─── -->
+        <h3 class="sub"><span class="dot" style="background:var(--accent4);box-shadow:0 0 8px var(--accent4)"></span>
+          9.5 — End-to-End: Airflow Triggers, MLflow Stores</h3>
+        <div class="callout info">
+          <div class="callout-title">🔁 Combined Tool Workflow</div>
+          <strong>Airflow triggers</strong> the evaluate task on schedule → task calls training/eval script →
+          script logs WAPE, MAPE, SHAP to <strong>MLflow</strong> → Airflow <strong>approval_gate reads MLflow run
+            metrics</strong> via the MLflow Client API → if WAPE passes, Airflow triggers <strong>MLflow model
+            registration</strong> → daily monitoring DAG <strong>reads the stored SHAP baseline from MLflow</strong> and
+          compares against today's SHAP → if shift detected, Airflow fires <strong>retrain DAG</strong> again.
+        </div>
+
+        <table class="nm-table">
+          <thead>
+            <tr>
+              <th>Tool</th>
+              <th>Its Role with MAPE / WAPE</th>
+              <th>Its Role with SHAP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:var(--accent5)">Airflow</strong></td>
+              <td>Schedules metric computation, gates pipeline on WAPE threshold, triggers retraining if MAPE/WAPE
+                rising</td>
+              <td>Sequences SHAP analysis task, passes importance vector as XCom for drift comparison</td>
+            </tr>
+            <tr>
+              <td><strong style="color:var(--accent)">MLflow</strong></td>
+              <td>Stores MAPE &amp; WAPE per run, enables cross-experiment comparison in UI, tags approval status</td>
+              <td>Stores SHAP plots as artifacts per run; baseline SHAP importance vector retrieved for drift detection
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="pg-num">— 09 —</div>
+      </div>
+
+      <!-- SECTION 10 -->
       <div class="nm-card c-purple" id="conclusion">
-        <div class="sec-label purple">Section 09</div>
+        <div class="sec-label purple">Section 10</div>
         <div class="sec-title">Final Conclusion</div>
         <div class="sec-divider"></div>
         <p>By integrating all pillars of this framework:</p>
@@ -1633,7 +1852,7 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
           We transform a machine learning model into a <strong>continuous, explainable, monitored, and production-grade
             intelligent system</strong> — aligned to both technical rigor and real-world business requirements.
         </div>
-        <div class="pg-num">— 09 —</div>
+        <div class="pg-num">— 10 —</div>
       </div>
 
     </div><!-- /content-inner -->
