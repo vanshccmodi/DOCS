@@ -1085,7 +1085,7 @@
           <div class="p-arrow"></div>
           <div class="p-step hl2">📝 MLflow Logging</div>
           <div class="p-arrow"></div>
-          <div class="p-step hl-human">� Human Review &amp; Sign-off</div>
+          <div class="p-step hl-human">�👤 Human Review &amp; Sign-off</div>
           <div class="p-arrow"></div>
           <div class="p-step">🔐 Automated Metric Gate</div>
           <div class="p-arrow"></div>
@@ -1391,8 +1391,7 @@
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.1
           —
           Logging Metrics</h3>
-        <div class="code-block">
-          <div class="code-lang">Python</div>
+        <div class="code-block"><div class="code-lang">Python</div>
           <code><span class="cm"># Log full metric stack inside an MLflow run</span>
 <span class="kw">with</span> mlflow.start_run():
     <span class="cm"># Training metrics</span>
@@ -1411,8 +1410,7 @@
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.2
           —
           Logging SHAP Artifacts</h3>
-        <div class="code-block">
-          <div class="code-lang">Python</div>
+        <div class="code-block"><div class="code-lang">Python</div>
           <code>mlflow.<span class="fn">log_artifact</span>(<span class="st">"shap_summary.png"</span>)
 mlflow.<span class="fn">log_artifact</span>(<span class="st">"waterfall_plot.png"</span>)</code>
         </div>
@@ -1420,8 +1418,7 @@ mlflow.<span class="fn">log_artifact</span>(<span class="st">"waterfall_plot.png
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>5.3
           —
           Approval Tagging</h3>
-        <div class="code-block">
-          <div class="code-lang">Python</div>
+        <div class="code-block"><div class="code-lang">Python</div>
           <code><span class="cm"># ⚠ Tag values are always STRINGS in MLflow — use "True" not True</span>
 mlflow.<span class="fn">set_tag</span>(<span class="st">"evaluator_approved"</span>, <span class="st">"True"</span>)
 mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>, <span class="st">"wape"</span>)</code>
@@ -1771,8 +1768,7 @@ mlflow.<span class="fn">set_tag</span>(<span class="st">"primary_metric"</span>,
         <!-- ─── DAG CODE ─── -->
         <h3 class="sub"><span class="dot" style="background:var(--accent5);box-shadow:0 0 8px var(--accent5)"></span>
           9.2 — Airflow DAG: Metric-Gated Pipeline</h3>
-        <div class="code-block">
-          <div class="code-lang">Python — Airflow DAG</div>
+        <div class="code-block"><div class="code-lang">Python — Airflow DAG</div>
           <code><span class="cm"># Airflow DAG — every task is metric-aware</span>
 <span class="kw">from</span> airflow <span class="kw">import</span> DAG
 <span class="kw">from</span> airflow.operators.python <span class="kw">import</span> PythonOperator, BranchPythonOperator
@@ -1856,8 +1852,7 @@ t_train  &gt;&gt; t_evaluate &gt;&gt; t_shap &gt;&gt; t_gate &gt;&gt; t_register
         <!-- ─── MLFLOW CODE ─── -->
         <h3 class="sub"><span class="dot" style="background:var(--accent);box-shadow:0 0 8px var(--accent)"></span>
           9.4 — MLflow Run: Metric + SHAP Logging</h3>
-        <div class="code-block">
-          <div class="code-lang">Python — MLflow Logging</div>
+        <div class="code-block"><div class="code-lang">Python — MLflow Logging</div>
           <code><span class="kw">with</span> mlflow.<span class="fn">start_run</span>(run_name=<span class="st">"sarimax_challenger_v3"</span>) <span class="kw">as</span> run:
 
     <span class="cm"># ── Metrics that Airflow approval_gate_task reads via MLflow API ──</span>
@@ -1902,8 +1897,7 @@ t_train  &gt;&gt; t_evaluate &gt;&gt; t_shap &gt;&gt; t_gate &gt;&gt; t_register
           insufficient. Unstable models can pass on one metric while regressing on others. The safe promotion gate
           requires a <strong>meaningful delta margin</strong>, no RMSE increase, bias within tolerance, and no SHAP
           anomaly.</p>
-        <div class="code-block">
-          <div class="code-lang">Python — Airflow Promotion Task</div>
+        <div class="code-block"><div class="code-lang">Python — Airflow Promotion Task</div>
           <code><span class="kw">def</span> <span class="fn">promote_to_production</span>(**ctx):
     <span class="cm"># Fetch challenger and champion metrics from MLflow</span>
     challenger = <span class="fn">get_run_metrics</span>(challenger_run_id)
