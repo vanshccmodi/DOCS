@@ -1,6 +1,6 @@
 # ⚙️ MLOps Framework — Documentation & Strategy
 
-> A pair of beautifully designed, self-contained HTML documents covering the full MLOps lifecycle for an **Ad Sales Forecasting / Smart Pump Monitoring** system.  
+> A collection of beautifully designed, self-contained HTML documents covering the full MLOps lifecycle for Machine Learning Systems.  
 > No build step, no dependencies — open in any browser and you're done.
 
 ---
@@ -11,6 +11,7 @@
 |---|---|
 | 📘 Technical Documentation | [mlops_documentation.html](https://vanshccmodi.github.io/DOCS/mlops_documentation.html) |
 | 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
+| ⚡ Universal MLOps Concept | [mlops_concept.html](https://vanshccmodi.github.io/DOCS/mlops_concept.html) |
 
 ---
 
@@ -52,6 +53,21 @@ A **Claymorphism**-styled interactive presentation built for stakeholder and men
 
 ---
 
+### 3. `mlops_concept.html` — Universal Framework Concept
+A **Modern Config-Driven Architecture** documentation page defining a generalized pipeline strategy for any machine learning paradigm.
+
+**Sections covered:**
+- ⚙️ Universal Config-Driven Design
+- 💾 Data Versioning (DVC) & Feature Store workflows
+- ⚖️ Automated Drift Detection & Retraining
+- 🌿 Model Explainability (SHAP)
+- 🧪 MLflow Tracking & Registry
+- 🌀 Airflow Orchestration & HITL Gates
+
+**Design system:** Dynamic Dual Theme (Light 🌅 / Dark 🌙 toggle) · Interactive code syntax highlighting · Glossary text tooltips · Inter + JetBrains Mono fonts
+
+---
+
 ## 🛠️ MLOps Stack
 
 | Tool | Role |
@@ -65,13 +81,13 @@ A **Claymorphism**-styled interactive presentation built for stakeholder and men
 
 ## 🎨 Design Highlights
 
-| | Documentation | Pump Optimization |
-|---|---|---|
-| **Style** | Neumorphism (Dark) | Claymorphism (Light + Dark toggle) |
-| **Font** | Inter + JetBrains Mono | Inter + Fira Code |
-| **Navigation** | Fixed sidebar with scroll-spy | Sidebar with section switching |
-| **Diagrams** | HTML pipeline steps + tables | Mermaid.js flowcharts |
-| **Responsive** | ✅ | ✅ |
+| | Documentation | Pump Optimization | Universal Concept |
+|---|---|---|---|
+| **Style** | Neumorphism (Dark) | Claymorphism (Light + Dark toggle) | Clean Modern (Light + Dark toggle) |
+| **Font** | Inter + JetBrains Mono | Inter + Fira Code | Inter + JetBrains Mono |
+| **Navigation** | Fixed sidebar with scroll-spy | Sidebar with section switching | Fixed sidebar with scroll-spy |
+| **Special** | HTML pipeline steps + tables | Mermaid.js flowcharts | Code syntax highlighting + Glossary tooltips |
+| **Responsive** | ✅ | ✅ | ✅ |
 
 ---
 
@@ -87,10 +103,12 @@ cd DOCS
 # Open in browser (Windows)
 start mlops_documentation.html
 start pump_optimization.html
+start mlops_concept.html
 
 # Open in browser (macOS/Linux)
 open mlops_documentation.html
 open pump_optimization.html
+open mlops_concept.html
 ```
 
 Or serve with any static file server:
@@ -106,6 +124,7 @@ npx serve .
 
 ```
 DOCS/
+├── mlops_concept.html         # Universal config-driven architecture doc
 ├── mlops_documentation.html   # Technical reference (Neumorphism)
 ├── pump_optimization.html     # Strategy deck (Claymorphism + dark mode)
 └── README.md
