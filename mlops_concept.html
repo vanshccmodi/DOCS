@@ -4610,27 +4610,20 @@
 
         // E2E Example — Model Comparison
         new Chart(document.getElementById('exampleChart'), { type: 'bar', data: { labels: ['ARIMA', 'SARIMAX', 'LSTM'], datasets: [{ label: 'RMSE', data: [142.3, 98.7, 115.6], backgroundColor: 'rgba(99,102,241,0.6)', borderColor: '#6366f1', borderWidth: 2, borderRadius: 6 }, { label: 'WAPE (%)', data: [12.4, 7.2, 9.8], backgroundColor: 'rgba(16,185,129,0.6)', borderColor: '#10b981', borderWidth: 2, borderRadius: 6 }, { label: 'MAPE (%)', data: [14.1, 8.5, 11.2], backgroundColor: 'rgba(245,158,11,0.6)', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 6 }] }, options: { responsive: true, plugins: { title: { display: true, text: 'Model Performance Comparison — Ad Sales Forecasting', color: '#e2e8f0' }, legend: { position: 'bottom' } }, scales: { y: { title: { display: true, text: 'Value' } } } } });
-        // Fix code-block indentation: strip common leading whitespace from all code blocks
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.code-block').forEach(function (el) {
-                var lines = el.textContent.split('\n');
-                // Remove leading/trailing blank lines
-                while (lines.length && !lines[0].trim()) lines.shift();
-                while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
-                // Find minimum indentation
-                var minIndent = Infinity;
-                lines.forEach(function (line) {
-                    if (line.trim().length === 0) return;
-                    var indent = line.match(/^(\s*)/)[1].length;
-                    if (indent < minIndent) minIndent = indent;
-                });
-                if (minIndent === Infinity) minIndent = 0;
-                // Strip common indent
-                el.textContent = lines.map(function (line) {
-                    return line.slice(minIndent);
-                }).join('\n');
+        // Dedent helper — strips common leading whitespace from a raw text string
+        function dedentCode(raw) {
+            var lines = raw.split('\n');
+            while (lines.length && !lines[0].trim()) lines.shift();
+            while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+            var minIndent = Infinity;
+            lines.forEach(function (line) {
+                if (!line.trim()) return;
+                var indent = line.match(/^(\s*)/)[1].length;
+                if (indent < minIndent) minIndent = indent;
             });
-        });
+            if (minIndent === Infinity) minIndent = 0;
+            return lines.map(function (line) { return line.slice(minIndent); }).join('\n');
+        }
 
         // ── COPY BUTTONS ────────────────────────────────────────────────────────────────
         document.querySelectorAll('.code-block').forEach(function (block) {
@@ -4726,7 +4719,7 @@
             document.querySelectorAll('.code-wrap').forEach(function (wrap) {
                 var block = wrap.querySelector('.code-block');
                 if (!block) return;
-                var text = block.textContent || '';
+                var text = dedentCode(block.textContent || '');
                 var detected = null;
                 for (var i = 0; i < LANG_PATTERNS.length; i++) {
                     if (LANG_PATTERNS[i].pattern.test(text)) { detected = LANG_PATTERNS[i]; break; }
@@ -4735,7 +4728,7 @@
                 var pre = document.createElement('pre');
                 var code = document.createElement('code');
                 code.className = detected ? 'language-' + detected.lang : 'language-plaintext';
-                code.textContent = text.trim();
+                code.textContent = text;
                 pre.appendChild(code);
                 pre.style.cssText = 'margin:0;background:transparent;padding:0;overflow:auto;';
                 block.innerHTML = '';
