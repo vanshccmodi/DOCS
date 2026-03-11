@@ -12,6 +12,7 @@
 | 📘 Technical Documentation | [mlops_documentation.html](https://vanshccmodi.github.io/DOCS/mlops_documentation.html) |
 | 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
 | ⚡ Universal MLOps Concept | [mlops_concept.html](https://vanshccmodi.github.io/DOCS/mlops_concept.html) |
+| 🔄 Airflow & MLflow Integration Setup | [mlflow_with_airflow.html](https://vanshccmodi.github.io/DOCS/mlflow_with_airflow.html) |
 
 ---
 
@@ -68,6 +69,20 @@ A **Modern Config-Driven Architecture** documentation page defining a generalize
 
 ---
 
+### 4. `mlflow_with_airflow.html` — Integration Setup Guide
+A **Clean Modern**-styled guide documenting the complete setup process required to integrate MLflow with a Dockerized Apache Airflow environment.
+
+**Sections covered:**
+- ⚙️ Environment Configuration (`.env`)
+- 🐋 Docker Compose Configuration
+- 📝 Version Control (`.gitignore`)
+- 🐍 The Data Pipeline (Airflow DAG)
+- 🚀 How to Run the Stack & Verify
+
+**Design system:** Dynamic Dual Theme (Light 🌅 / Dark 🌙 toggle) · Code syntax highlighting with Copy Buttons · Inter + JetBrains Mono fonts
+
+---
+
 ## 🛠️ MLOps Stack
 
 | Tool | Role |
@@ -81,13 +96,13 @@ A **Modern Config-Driven Architecture** documentation page defining a generalize
 
 ## 🎨 Design Highlights
 
-| | Documentation | Pump Optimization | Universal Concept |
-|---|---|---|---|
-| **Style** | Neumorphism (Dark) | Claymorphism (Light + Dark toggle) | Clean Modern (Light + Dark toggle) |
-| **Font** | Inter + JetBrains Mono | Inter + Fira Code | Inter + JetBrains Mono |
-| **Navigation** | Fixed sidebar with scroll-spy | Sidebar with section switching | Fixed sidebar with scroll-spy |
-| **Special** | HTML pipeline steps + tables | Mermaid.js flowcharts | Code syntax highlighting + Glossary tooltips |
-| **Responsive** | ✅ | ✅ | ✅ |
+| | Documentation | Pump Optimization | Universal Concept | Airflow + MLflow Setup |
+|---|---|---|---|---|
+| **Style** | Neumorphism (Dark) | Claymorphism (Light + Dark toggle) | Clean Modern (Light + Dark toggle) | Clean Modern (Light + Dark toggle) |
+| **Font** | Inter + JetBrains Mono | Inter + Fira Code | Inter + JetBrains Mono | Inter + JetBrains Mono |
+| **Navigation** | Fixed sidebar with scroll-spy | Sidebar with section switching | Fixed sidebar with scroll-spy | Fixed sidebar with scroll-spy |
+| **Special** | HTML pipeline steps + tables | Mermaid.js flowcharts | Code syntax highlighting + Glossary tooltips | Code syntax highlighting + Copy Buttons |
+| **Responsive** | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -104,11 +119,13 @@ cd DOCS
 start mlops_documentation.html
 start pump_optimization.html
 start mlops_concept.html
+start mlflow_with_airflow.html
 
 # Open in browser (macOS/Linux)
 open mlops_documentation.html
 open pump_optimization.html
 open mlops_concept.html
+open mlflow_with_airflow.html
 ```
 
 Or serve with any static file server:
@@ -124,6 +141,7 @@ npx serve .
 
 ```
 DOCS/
+├── mlflow_with_airflow.html   # Airflow & MLflow Integration Setup Guide
 ├── mlops_concept.html         # Universal config-driven architecture doc
 ├── mlops_documentation.html   # Technical reference (Neumorphism)
 ├── pump_optimization.html     # Strategy deck (Claymorphism + dark mode)
