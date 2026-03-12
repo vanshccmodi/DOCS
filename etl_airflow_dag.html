@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Enterprise Sensor Analytics Pipeline Documentation - Airflow, MLflow, and Postgres">
+    <title>Enterprise Sensor ETL Documentation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #1a2035;
+            --bg4: #232b42;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --accent3: #4f46e5;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --cyan: #22d3ee;
+            --pink: #ec4899;
+            --border: #1e293b;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        body.light {
+            --bg: #f0f4f8;
+            --bg2: #ffffff;
+            --bg3: #e8edf5;
+            --bg4: #dde3ee;
+            --text: #0f172a;
+            --text2: #1e293b;
+            --text3: #475569;
+            --border: #b8c4d8;
+            --glass: rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            --green: #059669;
+            --red: #dc2626;
+            --amber: #d97706;
+            --cyan: #0891b2;
+            --pink: #db2777;
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden;
+            transition: background .3s, color .3s;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        @media(min-width: 901px) {
+            body.sidebar-open {
+                overflow: auto;
+            }
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: #fff
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg2)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent3);
+            border-radius: 3px
+        }
+
+        /* Typography */
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: -1px;
+        }
+
+        body.light h1 {
+            background: linear-gradient(135deg, var(--accent3), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: var(--text3);
+            font-size: 15px;
+            margin-bottom: 40px
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent3);
+            letter-spacing: -0.5px;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 24px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        p,
+        li {
+            font-size: 14px;
+            color: var(--text2);
+            margin-bottom: 10px
+        }
+
+        ul {
+            padding-left: 20px;
+            margin-bottom: 16px;
+        }
+
+        .section {
+            margin-bottom: 64px;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Layout */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform .35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .35s ease;
+        }
+
+        body.sidebar-open .sidebar {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, .4);
+        }
+
+        .main {
+            margin: 0 auto;
+            padding: 60px 48px 80px;
+            max-width: 960px;
+            transition: margin .35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media(min-width: 901px) {
+            body.sidebar-open .main {
+                margin-left: 280px;
+            }
+        }
+
+        .sidebar-brand {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 18px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border: none;
+            padding: 0;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        .sidebar-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+
+        .sidebar-close-btn:hover {
+            background: var(--accent3);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .sidebar-open-tab {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 24px;
+            height: 60px;
+            border-radius: 0 10px 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width .2s, background .2s;
+            box-shadow: 2px 0 12px rgba(99, 102, 241, .4);
+        }
+
+        .sidebar-open-tab:hover {
+            width: 32px;
+            background: var(--accent3);
+        }
+
+        body.sidebar-open .sidebar-open-tab {
+            display: none;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity .35s;
+        }
+
+        body.sidebar-open .sidebar-overlay {
+            display: block;
+            opacity: 1;
+        }
+
+        @media(min-width:901px) {
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-list li a {
+            display: block;
+            padding: 10px 24px;
+            font-size: 13px;
+            color: var(--text2);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all .2s
+        }
+
+        .nav-list li a:hover,
+        .nav-list li a.active {
+            color: var(--accent2);
+            background: var(--glass);
+            border-left-color: var(--accent)
+        }
+
+        .nav-list a.active {
+            background: rgba(99, 102, 241, .15) !important;
+            color: #a5b4fc !important;
+            font-weight: 600;
+        }
+
+        /* UI Elements */
+        .card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 20px 0;
+            transition: transform .2s, box-shadow .2s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow)
+        }
+
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px
+        }
+
+        @media(max-width:900px) {
+            .grid2 {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 4px 2px
+        }
+
+        .badge-indigo { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        .badge-cyan { background: rgba(34, 211, 238, 0.15); color: var(--cyan); }
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--green); }
+        .badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+
+        .callout {
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .callout-icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .callout.tip { background: rgba(16, 185, 129, .1); border-color: var(--green); }
+        .callout.info { background: rgba(99, 102, 241, .1); border-color: var(--accent); }
+        .callout.warn { background: rgba(245, 158, 11, .1); border-color: var(--amber); }
+
+        .callout strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        /* Flow Diagram */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin: 32px 0
+        }
+
+        .flow-step {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 32px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+            min-width: 260px;
+            transition: all .2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .flow-step:hover {
+            border-color: var(--accent);
+            background: var(--accent3);
+            color: #fff;
+            transform: scale(1.02);
+        }
+
+        .flow-step span {
+            display: block;
+            font-size: 11px;
+            color: var(--text3);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        .flow-step:hover span {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 20px;
+            line-height: 1;
+            margin: 4px 0;
+        }
+
+        /* Dropdown/Collapsible */
+        .dropdown {
+            margin: 16px 0
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 20px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 600;
+            transition: all .2s;
+            width: 100%;
+            text-align: left
+        }
+
+        .dropdown-toggle:hover {
+            border-color: var(--accent);
+            background: var(--accent3);
+            color: #fff;
+        }
+
+        .dropdown-toggle .arrow {
+            transition: transform .3s;
+            font-size: 12px;
+        }
+
+        .dropdown-toggle.open .arrow {
+            transform: rotate(180deg)
+        }
+
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s cubic-bezier(0, 1, 0, 1);
+            background: var(--bg3);
+            border-radius: 0 0 8px 8px;
+            border: 1px solid var(--border);
+            border-top: none;
+            margin-top: -4px
+        }
+
+        .dropdown-content.open {
+            max-height: 4000px;
+            transition: max-height .4s cubic-bezier(1, 0, 1, 0);
+        }
+
+        .dropdown-content-inner {
+            padding: 20px 24px
+        }
+
+        /* Code Blocks */
+        .code-wrap {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #d1d5db;
+            overflow-x: auto;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .lang-label {
+            position: absolute;
+            top: 6px;
+            left: 14px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #fff;
+            z-index: 2;
+            background: #3572A5;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            z-index: 5;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-wrap {
+            position: fixed;
+            top: 20px;
+            right: 24px;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .switch {
+            width: 50px;
+            height: 26px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #303136;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; width: 18px;
+            left: 4px; bottom: 4px;
+            background-color: #fff;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        footer {
+            margin-top: 100px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text3);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body class="sidebar-open">
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <button class="sidebar-open-tab" onclick="toggleSidebar()">
+        <span>❯</span>
+    </button>
+
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h2>SensorETL Pro</h2>
+            <p>Data Pipeline & Governance</p>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <ul class="nav-list">
+            <li><a href="#overview" class="active">Project Overview</a></li>
+            <li><a href="#architecture">Architecture & Data Flow</a></li>
+            <li><a href="#tech-stack">Technology Stack</a></li>
+            <li><a href="#implementation">Implementation Steps</a></li>
+            <li><a href="#monitoring">How to Run & Monitor</a></li>
+            <li><a href="#achievements">Key Achievements</a></li>
+        </ul>
+    </aside>
+
+    <main class="main">
+        <div class="theme-toggle-wrap">
+            <span style="font-size: 11px; color: var(--text3); font-weight: 600;">DARK MODE</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle" checked onclick="toggleTheme()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- OVERVIEW -->
+        <section id="overview" class="section">
+            <div class="last-updated" style="display:inline-block; font-size:11px; background:var(--glass); padding:3px 12px; border-radius:20px; border:1px solid var(--border); margin-bottom:16px;">
+                v3.1.7 • March 2026
+            </div>
+            <h1>Enterprise Sensor Analytics</h1>
+            <p class="subtitle">Fully automated end-to-end data pipeline with AI-driven anomaly detection and MLflow observability.</p>
+
+            <div class="card">
+                <h2>📌 Project Overview</h2>
+                <p>The objective of this project was to build a robust, end-to-end data pipeline that simulates real-world sensor data ingestion, performs complex transformations, detects anomalies using Machine Learning, and logs detailed data observability metrics to MLflow.</p>
+                <p>The pipeline is fully automated and runs within a Dockerized environment using <strong>Apache Airflow 3.x</strong>, ensuring high availability and professional-grade orchestration.</p>
+            </div>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section id="architecture" class="section">
+            <h2>🏗️ Architecture & Data Flow</h2>
+            <p>The project follows a modern <strong>Medallion Architecture</strong> pattern to ensure data quality and lineage throughout the lifecycle:</p>
+            
+            <div class="flow">
+                <div class="flow-step">
+                    🥉 Bronze Layer
+                    <span>Raw Dataset • PostgreSQL Ingestion</span>
+                </div>
+                <div class="flow-arrow">▼</div>
+                <div class="flow-step highlight">
+                    🥈 Silver Layer
+                    <span>Validated • Enriched • Anomaly Tagged</span>
+                </div>
+                <div class="flow-arrow">▼</div>
+                <div class="flow-step">
+                    🥇 Gold Layer
+                    <span>Aggregated Metrics • Trend Analysis</span>
+                </div>
+            </div>
+
+            <div class="grid2">
+                <div class="card">
+                    <h3 style="color:var(--amber)">1. Bronze (Raw)</h3>
+                    <p>Simulated sensor data is appended to <code>raw_sensor_data</code> in PostgreSQL. This layer maintains the immutable source of truth for all readings.</p>
+                </div>
+                <div class="card">
+                    <h3 style="color:var(--cyan)">2. Silver (Enriched)</h3>
+                    <p>Data is validated with <strong>Pydantic</strong>. New features like <em>Heat Index</em> and <em>Anomaly Status</em> (via Scikit-Learn) are calculated and merged.</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="color:var(--green)">3. Gold (Aggregated)</h3>
+                <p>Final high-level analytics like <strong>Trend Slopes</strong>, linear regressions, and hourly averages per sensor are computed and stored in <code>processed_sensor_metrics</code> for downstream BI reporting.</p>
+            </div>
+        </section>
+
+        <!-- TECH STACK -->
+        <section id="tech-stack" class="section">
+            <h2>🛠️ Technology Stack</h2>
+            <div class="grid2">
+                <div class="card">
+                    <h3>Orchestration & DevOps</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><span class="badge badge-indigo">Airflow 3.1.7</span> Workflow Scheduler</li>
+                        <li><span class="badge badge-indigo">Docker</span> Containerization</li>
+                        <li><span class="badge badge-indigo">Redis</span> Task Brokering</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Data & Logic</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><span class="badge badge-cyan">PostgreSQL 16</span> Primary Storage</li>
+                        <li><span class="badge badge-cyan">Pandas/NumPy</span> Data Processing</li>
+                        <li><span class="badge badge-cyan">SQLAlchemy</span> ORM Mapping</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>AI & Quality</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><span class="badge badge-green">MLflow</span> Model Tracking</li>
+                        <li><span class="badge badge-green">Scikit-Learn</span> Isolation Forest</li>
+                        <li><span class="badge badge-green">Pydantic v2</span> Type Validation</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3>Monitoring</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><span class="badge badge-amber">Direct SMTP</span> Gmail Alerts</li>
+                        <li><span class="badge badge-amber">HTML Reports</span> Email Summaries</li>
+                        <li><span class="badge badge-amber">Log Audit</span> JSON Metadata</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- IMPLEMENTATION -->
+        <section id="implementation" class="section">
+            <h2>🚀 Step-by-Step Implementation</h2>
+            
+            <div class="dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                    1. Environment Setup & Dockerization
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-content">
+                    <div class="dropdown-content-inner">
+                        <p>The entire stack is containerized for portability. The <code>docker-compose.yaml</code> initializes five integrated services: Scheduler, Worker, Webserver, Postgres, and MLflow.</p>
+                        <div class="callout tip">
+                            <span class="callout-icon">💡</span>
+                            <div>
+                                <strong>Custom Dep Management</strong>
+                                Utilized the <code>_PIP_ADDITIONAL_REQUIREMENTS</code> env variable to auto-install ML libraries inside the containers without needing a custom Dockerfile.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                    2. Database Automation & Schema Governance
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-content">
+                    <div class="dropdown-content-inner">
+                        <p>Implemented a <code>setup_database_schema</code> task. This ensures the environment is self-healing, automatically creating <code>SERIAL</code>, <code>TIMESTAMP</code>, and <code>DOUBLE PRECISION</code> columns on the first run.</p>
+                        <pre class="code-block"><code>CREATE TABLE IF NOT EXISTS raw_sensor_data (
+    id SERIAL PRIMARY KEY,
+    sensor_id INTEGER,
+    timestamp TIMESTAMP,
+    temperature DOUBLE PRECISION...
+);</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                    3. Incremental Data Simulation
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-content">
+                    <div class="dropdown-content-inner">
+                        <p>Created a generator representing industrial 24-hour cycles. By using <code>if_exists="append"</code>, we simulate an ongoing data stream while preserving historical trends for the AI model.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                    4. Advanced Transformation & ML Integration
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-content">
+                    <div class="dropdown-content-inner">
+                        <ul style="margin-top: 0;">
+                            <li><strong>Feature Engineering:</strong> Calculated the <em>Heat Index</em> using a refined humidity-temperature interaction formula.</li>
+                            <li><strong>Linear Regression Slope:</strong> Computed the linear slope over the last 24 entries per sensor to detect environmental drift.</li>
+                            <li><strong>Isolation Forest:</strong> Deployed a 3% contamination model to autonomously flag sensor malfunctions or physical intrusions.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dropdown">
+                <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                    5. Data Observability with MLflow
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="dropdown-content">
+                    <div class="dropdown-content-inner">
+                        <p>Every pipeline run is tracked as a unique experiment artifact in MLflow.</p>
+                        <div class="callout info">
+                            <span class="callout-icon">📊</span>
+                            <div>
+                                <strong>Metrics Captured:</strong>
+                                Detailed statistical distributions (Mean, Std Dev, Min/Max) for all metrics, Dataset Versioning (MD5 hashes), and Audit Artifacts (JSON/CSVs).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MONITORING -->
+        <section id="monitoring" class="section">
+            <h2>📋 How to Run & Monitor</h2>
+            <div class="card">
+                <h3>1. Configuration</h3>
+                <p>Ensure your <code>.env</code> file contains the correct Google App Password credentials for the notification system:</p>
+                <div class="code-wrap">
+                    <div class="lang-label" style="background: #333; text-transform: uppercase;">.env</div>
+                    <pre class="code-block"><code>AIRFLOW__SMTP__SMTP_PASSWORD=ibfgg
+AIRFLOW__SMTP__SMTP_USER=abc@gmail.com</code></pre>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>2. Execution & Verification</h3>
+                <p>1. Start the stack: <code>docker-compose up -d</code>.</p>
+                <p>2. Trigger the <code>etl_mlflow_postgres_pipeline</code> in the Airflow UI (8080).</p>
+                <p>3. Review the execution trace and health metrics in the MLflow UI (5000).</p>
+            </div>
+
+            <div class="callout warn">
+                <span class="callout-icon">⚠️</span>
+                <div>
+                    <strong>Verification Step</strong>
+                    Check your Gmail inbox for the <strong>ETL Success Report</strong>. It should contain a formatted HTML table of the processed sensor metrics.
+                </div>
+            </div>
+        </section>
+
+        <!-- ACHIEVEMENTS -->
+        <section id="achievements" class="section">
+            <h2>🏆 Key Achievements</h2>
+            <div class="grid2">
+                <div class="card" style="border-left: 4px solid var(--green)">
+                    <strong>Idempotency</strong>
+                    <p>The entire pipeline can be safely re-run at any point without causing database schema corruption or duplicate record inconsistencies.</p>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--accent)">
+                    <strong>Professional Scalability</strong>
+                    <p>Uses modern Airflow TaskFlow decorators and high-performance libraries (SQLAlchemy, Pandas) suitable for enterprise-scale workloads.</p>
+                </div>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--amber)">
+                <strong>Enterprise Security</strong>
+                <p>Implemented secure Gmail App Password injection for notifications, keeping sensitive credentials isolated from the main logic.</p>
+            </div>
+        </section>
+
+        <footer>
+            &copy; 2026 Enterprise Media Platforms • Built with Apache Airflow & MLflow
+        </footer>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-open');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        function toggleDropdown(el) {
+            el.classList.toggle('open');
+            const content = el.nextElementSibling;
+            content.classList.toggle('open');
+        }
+
+        // Handle Active Nav Link
+        window.addEventListener('scroll', () => {
+            let fromTop = window.scrollY + 80;
+            const links = document.querySelectorAll('.nav-list a');
+            
+            links.forEach(link => {
+                let section = document.querySelector(link.hash);
+                if (
+                    section.offsetTop <= fromTop &&
+                    section.offsetTop + section.offsetHeight > fromTop
+                ) {
+                    links.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light');
+            document.getElementById('theme-toggle').checked = false;
+        }
+
+        hljs.highlightAll();
+    </script>
+</body>
+
+</html>
