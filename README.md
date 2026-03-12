@@ -11,25 +11,26 @@
 |---|---|
 | 📘 Technical Documentation | [mlops_documentation.html](https://vanshccmodi.github.io/DOCS/mlops_documentation.html) |
 | 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
+| 📊 ETL Pipeline for Sensor Data Processing | [etl_airflow_dag.html](https://vanshccmodi.github.io/DOCS/etl_airflow_dag.html) |
 | ⚡ Universal MLOps Concept | [mlops_concept.html](https://vanshccmodi.github.io/DOCS/mlops_concept.html) |
 | 🔄 Airflow & MLflow Integration Setup | [mlflow_with_airflow.html](https://vanshccmodi.github.io/DOCS/mlflow_with_airflow.html) |
-| 📊 Enterprise Sensor ETL Pipeline | [etl_airflow_dag.html](https://vanshccmodi.github.io/DOCS/etl_airflow_dag.html) |
 
 ---
 
 ## 📄 Pages at a Glance
 
-### 1. `etl_airflow_dag.html` — Enterprise Sensor ETL Pipeline
-A **Modern Dark/Glassmorphism**-styled documentation page detailing a production-grade sensor data analytics pipeline.
+### 1. `etl_airflow_dag.html` — ETL Pipeline for Sensor Data Processing
+A **Premium Glassmorphism**-styled documentation detailng a production-grade sensor data ETL pipeline using Airflow, PostgreSQL, and MLflow.
 
 **Sections covered:**
-- 🏗️ **Medallion Architecture**: Bronze (Raw), Silver (Enriched), and Gold (Aggregated) data flow.
-- 🧪 **AI Integration**: Anomaly Detection using **Isolation Forest** and Linear Regression trend analysis.
-- 📊 **MLflow Observability**: Deep tracking of statistical distributions, lineage, and data health scores.
-- 🚨 **Intelligent Alerting**: Success reports via direct SMTP and Failure callbacks.
-- 🐋 **Environment Automation**: Docker-compose orchestration and dynamic DB schema management.
+- 🏗️ **Orchestration Flow**: Sequential pipeline execution from schema setup to notification.
+- 🔄 **Append Strategy**: Implementation of incremental loading to build rich time-series history.
+- 📝 **Atomic Traceability**: Inclusion of `run_date` and `batch_id` for expert-level data lineage.
+- 🧪 **AI Guards**: Anomaly Detection using **Isolation Forest** and Linear Regression trend analysis.
+- 📊 **MLflow Integration**: Tracking statistical distributions, dataset snapshots, and artifacts.
+- 💡 **The "Why's"**: Detailed engineering rationale for every design choice (Append vs Replace, validation, etc.).
 
-**Design system:** Dark Glassmorphism (`#0a0e1a` base, glossy cards, `--accent: #6366f1`) · Inter + JetBrains Mono fonts · Interactive medallion flow diagram · Collapsible implementation steps.
+**Design system:** Dark Glassmorphism (`#0a0e1a` base, radial glow effects, `--accent: #6366f1`) · Inter font · Mermaid.js architecture visualization · Interactive nav tracking.
 
 ---
 
@@ -49,7 +50,11 @@ A **Neumorphism**-styled, scrollable documentation page covering the entire MLOp
 
 ---
 
-### 3. `pump_optimization.html` — Strategy Deck
+
+
+---
+
+### 4. `pump_optimization.html` — Strategy Deck
 A **Claymorphism**-styled interactive presentation built for stakeholder and mentor walkthroughs, focused on the Smart Pump Monitoring / Ad Sales Forecasting system.
 
 **Sections covered:**
@@ -68,7 +73,7 @@ A **Claymorphism**-styled interactive presentation built for stakeholder and men
 
 ---
 
-### 4. `mlops_concept.html` — Universal Framework Concept
+### 5. `mlops_concept.html` — Universal Framework Concept
 A **Modern Config-Driven Architecture** documentation page defining a generalized pipeline strategy for any machine learning paradigm.
 
 **Sections covered:**
@@ -82,7 +87,7 @@ A **Modern Config-Driven Architecture** documentation page defining a generalize
 
 ---
 
-### 5. `mlflow_with_airflow.html` — Integration Setup Guide
+### 6. `mlflow_with_airflow.html` — Integration Setup Guide
 A **Clean Modern**-styled guide documenting the complete setup process required to integrate MLflow with a Dockerized Apache Airflow environment.
 
 **Sections covered:**
@@ -110,13 +115,13 @@ A **Clean Modern**-styled guide documenting the complete setup process required 
 
 ## 🎨 Design Highlights
 
-| | Technical Reference | Strategy Deck | Universal Concept | Sensor ETL Pipeline |
+| | Tech Reference | Strategy Deck | Universal Concept | **Sensor ETL** |
 |---|---|---|---|---|
-| **Style** | Neumorphism (Dark) | Claymorphism (Themeable) | Clean Modern (Themeable) | **Glassmorphism (Dark)** |
-| **Font** | Inter + JetBrains Mono | Inter + Fira Code | Inter + JetBrains Mono | Inter + JetBrains Mono |
+| **Style** | Neumorphism | Claymorphism | Clean Modern | **Glassmorphism (v2)** |
+| **Font** | Inter | Fira Code | Inter | **Inter** |
 | **Nav** | Fixed sidebar | Sidebar switcher | Scroll-spy | **Fixed sidebar** |
-| **Special** | HTML pipeline steps | Mermaid.js flowcharts | Glossary tooltips | **Medallion flow diagram** |
-| **Responsive** | ✅ | ✅ | ✅ | ✅ |
+| **Special** | Pipeline steps | Mermaid.js | Glossary tooltips | **Mermaid.js v2** |
+| **Resp.** | ✅ | ✅ | ✅ | ✅ |
 
 ---
 
@@ -150,7 +155,7 @@ open mlflow_with_airflow.html
 
 ```
 DOCS/
-├── etl_airflow_dag.html       # Enterprise Sensor ETL Pipeline (Glassmorphism)
+├── etl_airflow_dag.html       # ETL Pipeline for Sensor Data Processing (Premium)
 ├── mlflow_with_airflow.html   # Airflow & MLflow Integration Setup Guide
 ├── mlops_concept.html         # Universal config-driven architecture doc
 ├── mlops_documentation.html   # Technical reference (Neumorphism)
