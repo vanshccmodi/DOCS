@@ -13,6 +13,7 @@
 | 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
 | 📊 ETL Pipeline for Sensor Data Processing | [etl_airflow_dag.html](https://vanshccmodi.github.io/DOCS/etl_airflow_dag.html) |
 | ⚡ Universal MLOps Concept | [mlops_concept.html](https://vanshccmodi.github.io/DOCS/mlops_concept.html) |
+| 🕉️ Ramayana RAG: Story-Aware Archive | [RamayanaOg.html](https://vanshccmodi.github.io/DOCS/RamayanaOg.html) |
 | 🔄 Airflow & MLflow Integration Setup | [mlflow_with_airflow.html](https://vanshccmodi.github.io/DOCS/mlflow_with_airflow.html) |
 
 ---
@@ -48,9 +49,18 @@ A **Neumorphism**-styled, scrollable documentation page covering the entire MLOp
 
 **Design system:** Dark Neumorphism (`#1e2030` base, inset/outset shadows, `--accent: #7c6af7`) · Inter + JetBrains Mono fonts · Active-scroll sidebar nav
 
----
+### 3. `RamayanaOg.html` — Ramayana RAG: Story-Aware Knowledge Archive
+A **Neumorphic-Glassmorphism (v3)**-styled portal detailing a high-fidelity spiritual RAG system.
 
+**Sections covered:**
+- 🕉️ **Project Genesis**: Transforming the Valmiki Ramayana into a queryable deep-reasoning archive.
+- 🔍 **Research Journey**: Evolution from hybrid Sanskrit/English sources to optimal translation.
+- 🧩 **Story-Aware Strategy**: Narrative chunking (202 events) that respects chronological integrity.
+- ⚙️ **Technical Stack**: Implementation with **LanceDB**, **BGE-M3**, **FlashRank**, and resilient **Groq/SambaNova** failover.
+- ⚠️ **Domain Adaptation**: Critical analysis of RAG strategy generalizability across SOP, Legal, and Tech domains.
+- 🧪 **RAG Monitoring**: Automated safety gates for Faithfulness (>0.9) and Relevance (>0.85).
 
+**Design system:** Dark Neumorphic-Glassmorphism (`#0a0e1a` base, `--accent: #6366f1`) · Mermaid.js Graph RAG viz · Interactive Story Timeline · Alias Glossary Search.
 
 ---
 
@@ -117,10 +127,10 @@ A **Clean Modern**-styled guide documenting the complete setup process required 
 
 | | Tech Reference | Strategy Deck | Universal Concept | **Sensor ETL** |
 |---|---|---|---|---|
-| **Style** | Neumorphism | Claymorphism | Clean Modern | **Glassmorphism (v2)** |
-| **Font** | Inter | Fira Code | Inter | **Inter** |
-| **Nav** | Fixed sidebar | Sidebar switcher | Scroll-spy | **Fixed sidebar** |
-| **Special** | Pipeline steps | Mermaid.js | Glossary tooltips | **Mermaid.js v2** |
+| **Style** | Neumorphism | Claymorphism | Clean Modern | **Glass v2** | **Neumorphic-Glass (v3)** |
+| **Font** | Inter | Fira Code | Inter | **Inter** | **Inter** |
+| **Nav** | Fixed sidebar | Sidebar switcher | Scroll-spy | **Fixed sidebar** | **Fixed sidebar** |
+| **Special** | Pipeline steps | Mermaid.js | Glossary tooltips | **Mermaid v2** | **Story Timeline** |
 | **Resp.** | ✅ | ✅ | ✅ | ✅ |
 
 ---
@@ -139,6 +149,7 @@ start etl_airflow_dag.html
 start mlops_documentation.html
 start pump_optimization.html
 start mlops_concept.html
+start RamayanaOg.html
 start mlflow_with_airflow.html
 
 # Open in browser (macOS/Linux)
@@ -146,6 +157,7 @@ open etl_airflow_dag.html
 open mlops_documentation.html
 open pump_optimization.html
 open mlops_concept.html
+open RamayanaOg.html
 open mlflow_with_airflow.html
 ```
 
@@ -158,6 +170,7 @@ DOCS/
 ├── etl_airflow_dag.html       # ETL Pipeline for Sensor Data Processing (Premium)
 ├── mlflow_with_airflow.html   # Airflow & MLflow Integration Setup Guide
 ├── mlops_concept.html         # Universal config-driven architecture doc
+├── RamayanaOg.html           # Ramayana RAG Story-Aware Knowledge Archive
 ├── mlops_documentation.html   # Technical reference (Neumorphism)
 ├── pump_optimization.html     # Strategy deck (Claymorphism)
 └── README.md
