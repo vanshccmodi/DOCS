@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Real-Life MLOps Pipeline Documentation - Production-grade Industrial IoT ML system with Airflow, MLflow, and AWS S3.">
+    <title>Real-Life MLOps Pipeline Documentation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- highlight.js syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Mermaid for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'dark',
+            securityLevel: 'loose',
+            flowchart: {
+                useMaxWidth: true,
+                htmlLabels: true,
+                curve: 'basis',
+                fontSize: 14,
+                nodeSpacing: 40,
+                rankSpacing: 40
+            }
+        });
+    </script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #1a2035;
+            --bg4: #232b42;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --accent3: #4f46e5;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --cyan: #22d3ee;
+            --pink: #ec4899;
+            --border: #1e293b;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #6366f1;
+            width: 0%;
+            z-index: 9999;
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: #fff
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg2)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent3);
+            border-radius: 3px
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform .35s ease, box-shadow .35s ease;
+        }
+
+        body.sidebar-open .sidebar {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, .4);
+        }
+
+        .sidebar-brand {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        .sidebar-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+
+        .sidebar-close-btn:hover {
+            background: var(--accent3);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .nav-list {
+            list-style: none
+        }
+
+        .nav-list li a {
+            display: block;
+            padding: 8px 24px;
+            font-size: 13px;
+            color: var(--text2);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all .2s
+        }
+
+        .nav-list li a:hover,
+        .nav-list li a.active {
+            color: var(--accent2);
+            background: var(--glass);
+            border-left-color: var(--accent)
+        }
+
+        .nav-list a.active {
+            background: rgba(99, 102, 241, .18) !important;
+            color: #a5b4fc !important;
+            border-left: 3px solid var(--accent);
+            padding-left: 13px;
+            font-weight: 600;
+        }
+
+        /* MAIN */
+        .main {
+            margin: 0 auto;
+            padding: 40px 48px 80px;
+            max-width: 1100px;
+            transition: margin .35s ease;
+        }
+
+        @media(min-width: 901px) {
+            body.sidebar-open .main {
+                margin-left: 280px;
+                margin-right: auto;
+            }
+        }
+
+        .section {
+            margin-bottom: 56px;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .subtitle {
+            color: var(--text3);
+            font-size: 15px;
+            margin-bottom: 40px
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent3);
+            position: relative;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 24px 0 12px
+        }
+
+        p, li {
+            font-size: 14px;
+            color: var(--text2);
+            margin-bottom: 8px
+        }
+
+        ul {
+            padding-left: 20px
+        }
+
+        /* CARDS & TABLES */
+        .card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 16px 0;
+            transition: transform .2s, box-shadow .2s
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px
+        }
+
+        th {
+            background: var(--bg4);
+            color: var(--accent2);
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent3)
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text2)
+        }
+
+        tr:hover td {
+            background: var(--glass)
+        }
+
+        /* CODE */
+        .code-wrap {
+            position: relative;
+            margin: 12px 0;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px 20px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--green);
+            overflow-x: auto;
+            line-height: 1.6;
+            white-space: pre
+        }
+
+        .lang-label {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: #fff;
+            z-index: 2;
+        }
+
+        .lang-python { background: #3572A5; }
+        .lang-bash { background: #4d7a6a; }
+        .lang-yaml { background: #cb171e; }
+        .lang-ini { background: #555; }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border);
+            color: var(--text3);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all .2s;
+            z-index: 1;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px
+        }
+
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--green) }
+        .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red) }
+        .badge-amber { background: rgba(245, 158, 11, 0.15); color: var(--amber) }
+        .badge-blue { background: rgba(99, 102, 241, 0.15); color: var(--accent2) }
+        .badge-cyan { background: rgba(34, 211, 238, 0.15); color: var(--cyan) }
+
+        /* MERMAID DIAGRAM CUSTOM STYLES */
+        .mermaid-container {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 32px 0;
+            overflow: hidden;
+            display: block;
+            text-align: center;
+        }
+
+        .mermaid {
+            background: transparent !important;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        /* Scale up icons and labels slightly */
+        .mermaid .nodeLabel { font-size: 14px !important; font-weight: 600; }
+        .mermaid .edgeLabel { font-size: 12px !important; color: var(--text3); }
+
+        /* CALLOUTS */
+        .callout {
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .callout.tip { background: rgba(16, 185, 129, .1); border-color: var(--green); }
+        .callout.note { background: rgba(99, 102, 241, .1); border-color: var(--accent); }
+        .callout.warning { background: rgba(245, 158, 11, .1); border-color: var(--amber); }
+        .callout.danger { background: rgba(239, 68, 68, .1); border-color: var(--red); }
+
+        /* THEME TOGGLE */
+        .theme-toggle-wrap {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch {
+            display: block;
+            --width-of-switch: 3.5em;
+            --height-of-switch: 2em;
+            --size-of-icon: 1.4em;
+            --slider-offset: 0.3em;
+            position: relative;
+            width: var(--width-of-switch);
+            height: var(--height-of-switch);
+        }
+
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f4f4f5;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: var(--size-of-icon);
+            width: var(--size-of-icon);
+            border-radius: 20px;
+            left: var(--slider-offset);
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
+            transition: .4s;
+        }
+
+        input:checked+.slider { background-color: #303136; }
+        input:checked+.slider:before {
+            left: calc(100% - (var(--size-of-icon) + var(--slider-offset)));
+            background: #303136;
+            box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+        }
+
+        /* LIGHT MODE */
+        body.light {
+            --bg: #f0f4f8;
+            --bg2: #ffffff;
+            --bg3: #e8edf5;
+            --bg4: #dde3ee;
+            --text: #0f172a;
+            --text2: #1e293b;
+            --text3: #475569;
+            --border: #b8c4d8;
+            --glass: rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        body.light .code-block { background: #1a1e2e; border-color: #2d3555; }
+        body.light h1 { background: linear-gradient(135deg, #4f46e5, #0891b2); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* CONTROLS */
+        .sidebar-open-tab {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 20px;
+            height: 56px;
+            border-radius: 0 8px 8px 0;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width .2s;
+            box-shadow: 2px 0 10px rgba(99, 102, 241, .4);
+        }
+
+        body.sidebar-open .sidebar-open-tab { display: none; }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 28px;
+            z-index: 500;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, .4);
+            opacity: 0;
+            pointer-events: none;
+            transition: all .3s;
+            transform: translateY(14px);
+        }
+
+        .back-to-top.visible { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+        .anchor-link {
+            opacity: 0;
+            margin-left: 8px;
+            font-size: 16px;
+            color: var(--text3);
+            text-decoration: none;
+            transition: opacity .2s;
+        }
+
+        h2:hover .anchor-link { opacity: 1; }
+
+        .last-updated {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--text3);
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 12px;
+            margin-bottom: 18px;
+        }
+
+        @media(max-width:900px) {
+            .main { padding: 64px 20px 80px; }
+            .flow-row { flex-direction: column; }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-bar"></div>
+
+    <button class="sidebar-open-tab" onclick="toggleSidebar()">☰</button>
+
+    <div class="theme-toggle-wrap">
+        <span style="font-size: 11px; color: var(--text3);">Light</span>
+        <label class="switch">
+            <input type="checkbox" id="themeCheckbox" onchange="toggleTheme()">
+            <span class="slider"></span>
+        </label>
+        <span style="font-size: 11px; color: var(--text3);">Dark</span>
+    </div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2>MLOps Pipeline Docs</h2>
+            <p>Real-Life Industrial IoT System</p>
+            <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
+        </div>
+        <ul class="nav-list">
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#architecture">1. System Architecture</a></li>
+            <li><a href="#file-map">2. File Map</a></li>
+            <li><a href="#setup">3. Environment Setup</a></li>
+            <li><a href="#breakdown">4. Task Breakdown</a></li>
+            <li><a href="#email">5. Email Alerts</a></li>
+            <li><a href="#mock-api">6. Mock IoT API</a></li>
+            <li><a href="#serving-api">7. Serving API</a></li>
+            <li><a href="#docker">8. Docker Services</a></li>
+            <li><a href="#cicd">9. CI/CD Pipeline</a></li>
+            <li><a href="#retry">10. Retry & Resilience</a></li>
+            <li><a href="#phase2">11. Phase 2 Improvements</a></li>
+        </ul>
+    </nav>
+
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <main class="main">
+        <section class="section" id="overview">
+            <h1>Real-Life MLOps Pipeline</h1>
+            <p class="subtitle">Full System Documentation & Orchestration Guide</p>
+            <div class="last-updated">📅 Last updated: March 23, 2026 &nbsp;•&nbsp; 🆔 DAG: real_life_mlops_pipeline</div>
+            
+            <div class="card">
+                <p>This pipeline simulates a <strong>production-grade Industrial IoT ML system</strong>. It automates the full lifecycle from data ingestion to containerized deployment, ensuring data quality via statistical tests and model excellence via performance gates.</p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                    <span class="badge badge-blue">Apache Airflow 3</span>
+                    <span class="badge badge-cyan">MLflow</span>
+                    <span class="badge badge-green">PostgreSQL</span>
+                    <span class="badge badge-amber">AWS S3</span>
+                    <span class="badge badge-red">FastAPI</span>
+                    <span class="badge badge-blue">Docker</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="architecture">
+            <h2>1. System Architecture</h2>
+            <p>The pipeline follows a robust sequential flow with multiple short-circuiting gates to maintain high standards of data and model integrity.</p>
+            
+            <div class="mermaid-container">
+                <div class="mermaid">
+                    flowchart TD
+                        A[Mock IoT API<br/>port 8001] -- "HTTP GET 200 rows" --> B(ingest_live_sensor_data)
+                        B --> C[(PostgreSQL<br/>mlops_raw_sensor_data)]
+                        C --> D{wait_for_sensor_data<br/>Sensor Gate}
+                        D --> E(extract_raw_data)
+                        E --> F{check_data_drift<br/>KS-Test Gate}
+                        
+                        F -- "No Drift" --> G(transform_raw_data)
+                        G --> H(train_and_log_model<br/>MLflow)
+                        H --> I{evaluate_model<br/>Accuracy Gate}
+                        
+                        F -- "Drift Detected" --> O["<span style='color:#ef4444'>●</span> Short-Circuit/Halt Pipeline"]
+                        
+                        I -- ">= 75%" --> J(create_model_bucket S3)
+                        J --> K(upload_model_to_s3)
+                        K --> L[(mlops_runs<br/>DB Log)]
+                        L --- M(Cleanup CSVs)
+                        
+                        I -- "< 75%" --> N["<span style='color:#ef4444'>●</span> Short-Circuit/Halt Deployment"]
+
+                        style O fill:#232b42,stroke:#ef4444,stroke-width:2px
+                        style N fill:#232b42,stroke:#ef4444,stroke-width:2px
+                        style D fill:#1a2035,stroke:#f59e0b,stroke-width:2px
+                        style F fill:#1a2035,stroke:#f59e0b,stroke-width:2px
+                        style I fill:#1a2035,stroke:#f59e0b,stroke-width:2px
+                        style C fill:#1a2035,stroke:#22d3ee,stroke-width:2px
+                        style L fill:#1a2035,stroke:#22d3ee,stroke-width:2px
+                </div>
+            </div>
+
+            <ul>
+                <li><strong>Ingests</strong> live sensor data from a streaming API.</li>
+                <li><strong>Validates</strong> the data quality and statistical distribution (KS-Test).</li>
+                <li><strong>Transforms</strong> raw readings into machine-learning features.</li>
+                <li><strong>Trains</strong> a Logistic Regression anomaly detection model.</li>
+                <li><strong>Deploys</strong> the model binary to AWS S3 if accuracy exceeds 75%.</li>
+                <li><strong>Notifies</strong> stakeholders via SMTP Alerts for success/failure.</li>
+            </ul>
+        </section>
+
+        <section class="section" id="file-map">
+            <h2>2. File Map</h2>
+            <p>Comprehensive list of all files connected to this DAG and their roles.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>dags/op_final.py</code></td>
+                        <td>Main DAG — orchestrates all task dependencies</td>
+                    </tr>
+                    <tr>
+                        <td><code>dags/tasks/etl_tasks.py</code></td>
+                        <td>ETL functions: ingest, drift check, extract, transform</td>
+                    </tr>
+                    <tr>
+                        <td><code>plugins/mlflow_train_operator_plugin.py</code></td>
+                        <td>Custom Airflow Operator for model training</td>
+                    </tr>
+                    <tr>
+                        <td><code>plugins/mlflow_hook_plugin.py</code></td>
+                        <td>Custom Airflow Hook wrapping the MLflow client</td>
+                    </tr>
+                    <tr>
+                        <td><code>plugins/postgres_sensor_plugin.py</code></td>
+                        <td>Custom Airflow Sensor polling PostgreSQL</td>
+                    </tr>
+                    <tr>
+                        <td><code>plugins/smtp_notifier_plugin.py</code></td>
+                        <td>Email notification plugin (success + failure)</td>
+                    </tr>
+                    <tr>
+                        <td><code>mock_sensor_api.py</code></td>
+                        <td>FastAPI server simulating live IoT sensors (port 8001)</td>
+                    </tr>
+                    <tr>
+                        <td><code>serving_api.py</code></td>
+                        <td>FastAPI server serving predictions from the S3 model (port 8000)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section" id="setup">
+            <h2>3. Environment Setup</h2>
+            <h3>3.1 Prerequisites</h3>
+            <ul>
+                <li>Docker Desktop (Windows) with WSL2 backend.</li>
+                <li>Python 3.9+ for running APIs locally.</li>
+            </ul>
+
+            <div class="callout note">
+                <div>
+                    <strong>AWS S3 Usage:</strong>
+                    The pipeline uses <strong>real AWS S3</strong> (region: ap-south-1) via the <code>aws_default</code> connection. LocalStack is only for development/mocking of other DAGs.
+                </div>
+            </div>
+
+            <h3>3.2 Environment Variables (.env)</h3>
+            <div class="code-wrap">
+                <div class="lang-label">.env / ini</div>
+                <div class="code-block" id="env-code">AIRFLOW_UID=50000
+_PIP_ADDITIONAL_REQUIREMENTS=apache-airflow-providers-postgres mlflow scikit-learn pydantic
+
+# SMTP Email Alerts
+AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com
+AIRFLOW__SMTP__SMTP_PORT=587
+AIRFLOW__SMTP__SMTP_USER=your@gmail.com
+AIRFLOW__SMTP__SMTP_PASSWORD=your_app_password
+
+# AWS Connection
+AIRFLOW_CONN_AWS_DEFAULT=aws://ACCESS_KEY:SECRET@/?region_name=ap-south-1</div>
+                <button class="copy-btn" onclick="copyCode('env-code')">Copy</button>
+            </div>
+
+            <div class="callout tip">
+                <div>
+                    <strong>Pro Tip:</strong>
+                    Use a Gmail App Password (16-char) for SMTP, not your main password.
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="breakdown">
+            <h2>4. Task Breakdown</h2>
+            
+            <h3>Task 1 — init_db_tables</h3>
+            <p>Creates <code>mlops_raw_sensor_data</code> for readings and <code>mlops_runs</code> for audit logs.</p>
+
+            <h3>Task 2 — ingest_live_sensor_data</h3>
+            <p>Fetches 200 rows from the Mock API via <code>host.docker.internal:8001</code>.</p>
+
+            <h3>Task 3 — wait_for_sensor_data</h3>
+            <p>Custom sensor; polls every 10s. Blocks until 1+ row from the last hour arrives.</p>
+
+            <h3>Task 4 — extract_raw_data</h3>
+            <p>Combines new batch with 100k rows of historical mock data (Normal Dist, μ=50, σ=15).</p>
+
+            <h3>Task 5 — check_data_drift</h3>
+            <p>Uses <strong>Kolmogorov-Smirnov Test</strong>. Short-circuits if <code>P-Value < 0.001</code>.</p>
+
+            <h3>Task 6 — transform_raw_data</h3>
+            <div class="card">
+                <p><strong>Feature Engineering Logic:</strong></p>
+                <table>
+                    <thead>
+                        <tr><th>Column</th><th>Formula</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>feature1</code></td><td><code>value × 1.5 + N(0, 2)</code></td><td>Linear scale + Noise</td></tr>
+                        <tr><td><code>feature2</code></td><td><code>value² / 100</code></td><td>Polynomial</td></tr>
+                        <tr><td><code>target</code></td><td><code>1 if val > 75th % else 0</code></td><td>Anomaly Label</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Task 7 — train_and_log_model</h3>
+            <p>Trains <code>LogisticRegression</code>, logs to MLflow registry, and pushes accuracy to XCom.</p>
+
+            <h3>Task 8 — evaluate_model</h3>
+            <p>Short-circuits deployment if accuracy < 75%.</p>
+
+            <h3>Task 10 — upload_model_to_s3</h3>
+            <p>Deploys to <code>s3://mlops-production-models-bucket/models/logistic_model.pkl</code>.</p>
+        </section>
+
+        <section class="section" id="email">
+            <h2>5. Email Alerts</h2>
+            <table>
+                <thead>
+                    <tr><th>Event</th><th>Trigger</th><th>Subject</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Task Crash</td><td><code>on_failure</code></td><td>🚨 Airflow Task Failure: {task_id}</td></tr>
+                    <tr><td>DAG Success</td><td><code>on_success</code></td><td>✅ Airflow DAG Success: {dag_id}</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="section" id="mock-api">
+            <h2>6. Mock IoT Sensor API</h2>
+            <p>Runs on Port 8001. Simulates real-world sensor noise and intermittent anomaly spikes (5% chance).</p>
+            <div class="code-wrap">
+                <div class="lang-label">bash</div>
+                <div class="code-block" id="bash-run-api"># Start the stream locally
+python mock_sensor_api.py</div>
+                <button class="copy-btn" onclick="copyCode('bash-run-api')">Copy</button>
+            </div>
+        </section>
+
+        <section class="section" id="serving-api">
+            <h2>7. Model Serving API</h2>
+            <p>FastAPI server on Port 8000. Downloads latest S3 model on startup.</p>
+            <div class="code-wrap">
+                <div class="lang-label">bash</div>
+                <div class="code-block" id="bash-predict">curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{"feature1": 75.0, "feature2": 30.25}'</div>
+                <button class="copy-btn" onclick="copyCode('bash-predict')">Copy</button>
+            </div>
+        </section>
+
+        <section class="section" id="docker">
+            <h2>8. Docker Services Summary</h2>
+            <div class="card">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div><strong>Postgres:</strong> Port 5432 (Metadata + Data)</div>
+                    <div><strong>MLflow:</strong> Port 5000 (Registry)</div>
+                    <div><strong>Redis:</strong> Port 6379 (Task Broker)</div>
+                    <div><strong>Airflow UI:</strong> Port 8080</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="cicd">
+            <h2>9. CI/CD Pipeline</h2>
+            <p>GitHub Actions in <code>.github/workflows/airflow_tests.yml</code> runs <code>pytest</code> on every push to main, ensuring DAG integrity and task completeness.</p>
+        </section>
+
+        <section class="section" id="retry">
+            <h2>10. Retry & Resilience</h2>
+            <ul>
+                <li><strong>Retries:</strong> 3 attempts per task.</li>
+                <li><strong>Delay:</strong> 5 minutes between retries.</li>
+                <li><strong>Cleanup:</strong> <code>cleanup_local_files</code> runs <code>all_done</code> to prevent disk leaks.</li>
+            </ul>
+        </section>
+
+        <section class="section" id="phase2">
+            <h2>11. Phase 2 Improvements</h2>
+            <div class="card">
+                <ul>
+                    <li>✅ Live API Ingestion</li>
+                    <li>✅ KS Statistical Drift Detection</li>
+                    <li>✅ Model Quality Gate (75%)</li>
+                    <li>✅ Containerized Serving API</li>
+                    <li>✅ MLflow Model Registry Tracking</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // SIDEBAR TOGGLE
+        function toggleSidebar() {
+            document.body.classList.toggle('sidebar-open');
+        }
+
+        // THEME TOGGLE
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+        }
+
+        // Init Theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light');
+            document.getElementById('themeCheckbox').checked = false;
+        } else {
+            document.getElementById('themeCheckbox').checked = true;
+        }
+
+        // SCROLL PROGRESS
+        window.onscroll = function() {
+            var winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            var height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            var scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+
+            // Back to top visible
+            if (winScroll > 300) {
+                document.getElementById("backToTop").classList.add('visible');
+            } else {
+                document.getElementById("backToTop").classList.remove('visible');
+            }
+        };
+
+        // COPY CODE
+        function copyCode(id) {
+            const code = document.getElementById(id).innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.style.background = '#10b981';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        // ACTIVE NAV HIGHLIGHT
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-list a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize syntax highlighting
+        hljs.highlightAll();
+
+        // Add anchor links to H2
+        document.querySelectorAll('h2').forEach(h2 => {
+            const anchor = document.createElement('a');
+            anchor.className = 'anchor-link';
+            anchor.href = '#' + h2.parentNode.id;
+            anchor.innerHTML = '#';
+            h2.appendChild(anchor);
+        });
+    </script>
+</body>
+
+</html>

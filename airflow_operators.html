@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Apache Airflow Plugins Guide - Extending functionality with Custom Operators, Hooks, Sensors, and UI views.">
+    <title>Airflow Plugins & Custom Extensions Guide</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #1a2035;
+            --bg4: #232b42;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --accent3: #4f46e5;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --cyan: #22d3ee;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --border: #1e293b;
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #6366f1;
+            width: 0%;
+            z-index: 9999;
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden
+        }
+
+        body.light {
+            --bg: #f0f4f8;
+            --bg2: #ffffff;
+            --bg3: #e8edf5;
+            --bg4: #dde3ee;
+            --text: #0f172a;
+            --text2: #1e293b;
+            --text3: #475569;
+            --border: #b8c4d8;
+            --glass: rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform .35s ease, box-shadow .35s ease;
+            overflow-y: auto;
+        }
+
+        body.sidebar-open .sidebar {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, .4);
+        }
+
+        .sidebar-brand {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .nav-list {
+            list-style: none
+        }
+
+        .nav-group-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 16px 24px 8px;
+        }
+
+        .nav-list li a {
+            display: block;
+            padding: 8px 24px;
+            font-size: 13px;
+            color: var(--text2);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all .2s
+        }
+
+        .nav-list li a:hover,
+        .nav-list li a.active {
+            color: var(--accent2);
+            background: var(--glass);
+            border-left-color: var(--accent)
+        }
+
+        .sidebar-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+
+        .sidebar-close-btn:hover {
+            background: var(--accent3);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .main {
+            margin: 0 auto;
+            padding: 40px 48px 80px;
+            max-width: 1000px;
+            transition: margin .35s ease;
+        }
+
+        @media(min-width: 901px) {
+            body.sidebar-open .main {
+                margin-left: 280px;
+            }
+        }
+
+        .section {
+            margin-bottom: 56px;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .subtitle {
+            color: var(--text3);
+            font-size: 15px;
+            margin-bottom: 40px
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent3);
+            position: relative;
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 20px 0 10px
+        }
+
+        p,
+        li {
+            font-size: 14px;
+            color: var(--text2);
+            margin-bottom: 8px
+        }
+
+        .card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 16px 0;
+            transition: transform .2s, box-shadow .2s
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow)
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: #d1d5db;
+            overflow-x: auto;
+            margin: 12px 0;
+            line-height: 1.6;
+            white-space: pre;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px
+        }
+
+        th {
+            background: var(--bg4);
+            color: var(--accent2);
+            text-align: left;
+            padding: 12px 14px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent3)
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text2)
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-blue {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent2)
+        }
+
+        .badge-cyan {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--cyan)
+        }
+
+        .badge-amber {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber)
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green)
+        }
+
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 32px 0;
+        }
+
+        .flow-step {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            min-width: 280px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: var(--accent);
+            margin: 12px 0;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+        }
+
+        .sidebar-open-tab {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 20px;
+            height: 56px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 0 10px rgba(99, 102, 241, .4);
+            transition: width .2s;
+        }
+
+        .sidebar-open-tab:hover {
+            width: 28px;
+            background: var(--accent3);
+        }
+
+        body.sidebar-open .sidebar-open-tab {
+            display: none;
+        }
+
+        .theme-toggle-wrap {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 3.5rem;
+            height: 2rem;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f4f4f5;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 1.4rem;
+            width: 1.4rem;
+            left: 0.3rem;
+            bottom: 0.3rem;
+            background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #303136;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(1.5rem);
+            background: #303136;
+            box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+        }
+
+        .callout {
+            border-radius: 10px;
+            padding: 16px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            background: var(--glass);
+            display: flex;
+            gap: 12px;
+            font-size: 14px;
+        }
+
+        .callout.tip {
+            border-color: var(--green);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .callout.note {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .glossary-term {
+            color: var(--accent2);
+            border-bottom: 1px dashed var(--accent2);
+            cursor: help;
+            position: relative;
+            font-weight: 500;
+        }
+
+        .glossary-tip {
+            visibility: hidden;
+            width: 240px;
+            background: var(--bg4);
+            color: var(--text);
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 100;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            font-size: 12px;
+            line-height: 1.5;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            pointer-events: none;
+        }
+
+        .glossary-term:hover .glossary-tip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 500;
+            border: none;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+        }
+
+        .anchor-link {
+            opacity: 0;
+            margin-left: 10px;
+            font-size: 18px;
+            color: var(--text3);
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        h2:hover .anchor-link {
+            opacity: 1;
+        }
+
+        pre code.hljs {
+            background: transparent;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="progress-bar"></div>
+
+    <button class="sidebar-open-tab" onclick="document.body.classList.add('sidebar-open')">❯</button>
+
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>Airflow Extensions</h2>
+            <p>Plugin Architecture & Custom Ops</p>
+            <button class="sidebar-close-btn" onclick="document.body.classList.remove('sidebar-open')">✕</button>
+        </div>
+        <ul class="nav-list" id="sidebar-nav">
+            <div class="nav-group-label">On This Page</div>
+            <li><a href="#intro" class="active">Overview</a></li>
+            <li><a href="#vs-connections">Connections vs. Plugins</a></li>
+            <li><a href="#importance">Built-in vs. Custom</a></li>
+            <li><a href="#best-practices">Main DAG vs. Plugins</a></li>
+            <li><a href="#storage">Storage & Discovery</a></li>
+            <li><a href="#example">Implementation</a></li>
+            <li><a href="#types">Plugin Ecosystem</a></li>
+            <li><a href="#showcase">Provider Showcase DAG</a></li>
+            <li><a href="#exploration">Operator Library</a></li>
+            <div class="nav-group-label" style="margin-top: 10px;">Deep Dive Guides</div>
+            <li><a href="#s3-guide">AWS S3 Master</a></li>
+            <li><a href="#db-guide">Database Master</a></li>
+            <li><a href="#gcp-guide">Google Cloud Master</a></li>
+            <li><a href="#core-guide">Core Logic Master</a></li>
+            <li><a href="#msg-guide">Messaging Master</a></li>
+
+
+        </ul>
+    </div>
+
+    <div class="theme-toggle-wrap">
+        <label class="switch">
+            <input type="checkbox" id="theme-toggle" onchange="document.body.classList.toggle('light')">
+            <span class="slider"></span>
+        </label>
+    </div>
+
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+
+    <div class="main">
+        <div class="section" id="intro">
+            <h1>Airflow Plugins Guide</h1>
+            <p class="subtitle">Extending functional capabilities without touching core Airflow code.</p>
+
+            <h2>What are Airflow Plugins? <a href="#intro" class="anchor-link">#</a></h2>
+            <p>In Apache Airflow, a <strong>plugin</strong> is a robust mechanism to extend the platform's
+                functionality. It allows developers to inject custom features into the environment without having to
+                fork or modify the core codebase.</p>
+
+            <div class="card">
+                <h3>The Operational Analogy</h3>
+                <div class="flow">
+                    <div class="flow-step" style="border-color: var(--accent);">
+                        <strong style="color: var(--accent2);">Airflow Core</strong><br>
+                        <span style="font-size: 12px; color: var(--text3);">The "Operating System"</span>
+                    </div>
+                    <div class="flow-arrow">⇅</div>
+                    <div class="flow-step" style="border-color: var(--cyan);">
+                        <strong style="color: var(--cyan);">Plugin Layer</strong><br>
+                        <span style="font-size: 12px; color: var(--text3);">The "Installed Application"</span>
+                    </div>
+                </div>
+                <p>Just as an OS provides the resources and a plugin adds the specific tool, Airflow provides the
+                    orchestration while plugins provide the domain-specific logic.</p>
+            </div>
+        </div>
+
+        <div class="section" id="vs-connections">
+            <h2>Connections vs. Plugins <a href="#vs-connections" class="anchor-link">#</a></h2>
+            <p>A common point of confusion is differentiating between <strong>Connections</strong> (Configuration) and
+                <strong>Plugins</strong> (Logic). They work in tandem but serve distinct purposes.</p>
+
+            <div class="card">
+                <h3>The Network Analogy</h3>
+                <p><strong>Connection:</strong> The WiFi Password (credentials that grant access).<br>
+                    <strong>Plugin:</strong> The Application (the browser or app that actually uses the internet to do
+                    work).
+                </p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Connection</th>
+                        <th>Plugin</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Primary Role</td>
+                        <td>Store Credentials (Host, User, Pass)</td>
+                        <td>Execute Business Logic</td>
+                    </tr>
+                    <tr>
+                        <td>Metadata Usage</td>
+                        <td>Configuration Only</td>
+                        <td>Code / Functional Extension</td>
+                    </tr>
+                    <tr>
+                        <td>DAG Integration</td>
+                        <td>Referenced as <code>conn_id</code></td>
+                        <td>Imported as <code>Operator</code> or <code>Hook</code></td>
+                    </tr>
+                    <tr>
+                        <td>Interface</td>
+                        <td>Airflow Admin UI Settings</td>
+                        <td>Python Code in <code>plugins/</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="callout note">
+                <div>
+                    <strong>Pro Tip:</strong> Most plugins use connections internally. A <strong>Custom Hook</strong>
+                    (Plugin) will call <code>self.get_connection("conn_id")</code> to retrieve the credentials stored in
+                    the Airflow Metadata Database.
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="importance">
+            <h2>When to Use Custom Plugins <a href="#importance" class="anchor-link">#</a></h2>
+            <p>Airflow comes with a massive library of <strong>Built-in Providers</strong>. You should only create a
+                plugin when a standard provider doesn't exist for your specific requirement.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 24px 0;">
+                <div class="card" style="margin: 0; border-color: var(--green);">
+                    <h3 style="color: var(--green);">No Plugin Needed</h3>
+                    <p style="font-size: 12px;">Use built-in Providers for:</p>
+                    <ul style="font-size: 12px; margin-bottom: 0;">
+                        <li><span class="badge badge-green">PostgreSQL</span> (PostgresOperator)</li>
+                        <li><span class="badge badge-green">AWS S3</span> (S3Hook)</li>
+                        <li><span class="badge badge-green">GCP</span> (BigQueryOperator)</li>
+                        <li><span class="badge badge-green">Docker</span> (DockerOperator)</li>
+                    </ul>
+                </div>
+                <div class="card" style="margin: 0; border-color: var(--amber);">
+                    <h3 style="color: var(--amber);">Plugin Required</h3>
+                    <p style="font-size: 12px;">Create Plugins for:</p>
+                    <ul style="font-size: 12px; margin-bottom: 0;">
+                        <li><span class="badge badge-amber">Internal APIs</span> (Secret corporate services)</li>
+                        <li><span class="badge badge-amber">Custom ML Ops</span> (MLflow training steps)</li>
+                        <li><span class="badge badge-amber">Data Quality</span> (Custom validation logic)</li>
+                        <li><span class="badge badge-amber">UI Views</span> (Custom monitoring panels)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>MLOps Stack Integration Example</h3>
+                <p>For a typical production pipeline involving <strong>MLflow</strong> and specialized resources:</p>
+                <ul>
+                    <li><code>MLflowTrainingOperator</code>: Enforces specific logging standards across the company.
+                    </li>
+                    <li><code>GPUAvailabilitySensor</code>: Pauses the DAG until a private GPU cluster is ready.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="best-practices">
+            <h2>Architectural Goal: Main DAG vs. Plugins <a href="#best-practices" class="anchor-link">#</a></h2>
+            <p>Technically, you can write all your logic inside a DAG file using <code>PythonOperator</code>. However,
+                this lead to <strong>Technical Debt</strong> as projects scale.</p>
+
+            <div class="grid2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="card" style="border-left: 4px solid var(--red);">
+                    <strong style="color: var(--red);">Direct DAG Logic</strong>
+                    <p style="font-size: 12px;">The "Spaghetti" Approach:</p>
+                    <ul style="font-size: 11px;">
+                        <li>High code duplication across DAGs.</li>
+                        <li>Hard to unit test logic independently.</li>
+                        <li>Bloated DAG files (1000+ lines).</li>
+                        <li>Difficult for team collaboration.</li>
+                    </ul>
+                </div>
+                <div class="card" style="border-left: 4px solid var(--green);">
+                    <strong style="color: var(--green);">Plugin-Based Logic</strong>
+                    <p style="font-size: 12px;">The "Clean" Approach:</p>
+                    <ul style="font-size: 11px;">
+                        <li>Reusable across dozens of pipelines.</li>
+                        <li>Isolated for easy unit testing.</li>
+                        <li>Clean, readable DAG files (50 lines).</li>
+                        <li>Follows DRY (Don't Repeat Yourself) principles.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout tip">
+                <div>
+                    <strong>Summary for your Sir:</strong> "While we can write custom logic in the DAG using
+                    PythonOperators, we use Plugins to create reusable, maintainable components. This keeps our
+                    orchestration layer thin and our business logic modular."
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="storage">
+            <h2>Storage & Discovery <a href="#storage" class="anchor-link">#</a></h2>
+            <p>Airflow scans the <code>plugins/</code> directory in your project root at startup and automatically
+                registers any class inheriting from the <code>AirflowPlugin</code> base class.</p>
+
+            <div class="code-block">
+                airflow_project/
+                ├── dags/ # Your workflow definitions
+                ├── plugins/ # The extension directory
+                │ └── internal_lib/
+                │ └── ml_plugins.py # Your plugin definitions
+                └── airflow.cfg # Scan setting "plugins_folder"</div>
+        </div>
+
+        <div class="section" id="example">
+            <h2>Component Implementation <a href="#example" class="anchor-link">#</a></h2>
+            <p>The standard way to define a plugin is by bundling your custom components into a single registration
+                class.</p>
+
+            <div class="code-wrap">
+                <div class="code-block"><code class="python">from airflow.plugins_manager import AirflowPlugin
+from airflow.models.baseoperator import BaseOperator
+from airflow.utils.decorators import apply_defaults
+
+class HelloOperator(BaseOperator):
+    """A simple operator that prints a greeting."""
+    @apply_defaults
+    def __init__(self, name="World", *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+
+    def execute(self, context):
+        print(f"Hello {self.name}!")
+
+# Registration Class
+class HelloPlugin(AirflowPlugin):
+    name = "hello_plugin"
+    operators = [HelloOperator]
+    hooks = []
+    sensors = []
+    macros = []
+    admin_views = []
+    flask_blueprints = []
+    menu_links = []</code></div>
+            </div>
+        </div>
+
+        <div class="section" id="types">
+            <h2>The Plugin Ecosystem <a href="#types" class="anchor-link">#</a></h2>
+
+            <div class="card">
+                <h3><span class="badge badge-blue">1</span> Custom Operators</h3>
+                <p>The workhorses of any DAG. They encapsulate <strong>Task Logic</strong>. Common examples include
+                    <code>MLTrainingOperator</code> or <code>SparkSubmitOperator</code>.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="badge badge-cyan">2</span> Custom Hooks</h3>
+                <p>The interface to the outside world. They handle <strong>Authentication</strong> and
+                    <strong>Connections</strong>. A <code>MLflowHook</code> would handle model logging credentials.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="badge badge-amber">3</span> Custom Sensors</h3>
+                <p>The "Waiters" of Airflow. They perform <strong>Polling</strong> until a condition is met (e.g.,
+                    <code>S3KeySensor</code> or <code>ModelReadySensor</code>).</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="badge badge-green">4</span> UI Components</h3>
+                <p>Airflow allows you to add entire <strong>Flask-AppBuilder</strong> views. This is used by large
+                    organizations to add "Lineage Viewers" or "Data Quality Dashboards" directly into the Airflow
+                    navbar.</p>
+            </div>
+        </div>
+
+        <div class="section" id="showcase">
+            <h1>Airflow Provider Packages Showcase DAG</h1>
+            <p class="subtitle">Technical Documentation for End-to-End ETL Pipeline showcasing integration across
+                multiple platforms.</p>
+
+            <h2>1. Overview <a href="#showcase" class="anchor-link">#</a></h2>
+            <p>This project demonstrates the usage of provider packages in Apache Airflow by building an end-to-end ETL
+                pipeline. The DAG showcases integration with multiple systems using Airflow providers:</p>
+            <ul>
+                <li><span class="badge badge-blue">Database</span> PostgreSQL</li>
+                <li><span class="badge badge-cyan">File System</span> local filesystem</li>
+                <li><span class="badge badge-amber">Cloud Storage</span> AWS S3 (via LocalStack)</li>
+                <li><span class="badge badge-green">Data Warehouse</span> Google BigQuery (simulated) or GCS</li>
+            </ul>
+
+            <div class="grid2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                <div class="card">
+                    <h3 style="margin-top: 0;">2. Objectives <a href="#showcase" class="anchor-link">#</a></h3>
+                    <ul style="font-size: 13px;">
+                        <li>Demonstrate Airflow Providers architecture</li>
+                        <li>Understand Hooks, Operators, and Sensors</li>
+                        <li>Simulate a real-world data pipeline</li>
+                        <li>Showcase integration across multiple platforms</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="margin-top: 0;">3. Architecture <a href="#showcase" class="anchor-link">#</a></h3>
+                    <p><strong>3.1 High-Level Flow</strong></p>
+                    <div class="flow" style="margin: 10px 0;">
+                        <span style="font-size: 11px; font-family: monospace; color: var(--accent2);">Postgres → Extract
+                            → CSV → Sensor → S3 → BQ → Report</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>3.2 System Components</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Layer</th>
+                            <th>Technology</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Orchestration</td>
+                            <td>Airflow</td>
+                        </tr>
+                        <tr>
+                            <td>Database</td>
+                            <td>PostgreSQL</td>
+                        </tr>
+                        <tr>
+                            <td>File Storage</td>
+                            <td>Local Filesystem (/tmp)</td>
+                        </tr>
+                        <tr>
+                            <td>Object Storage</td>
+                            <td>AWS S3 (LocalStack)</td>
+                        </tr>
+                        <tr>
+                            <td>Data Warehouse</td>
+                            <td>BigQuery (Simulated)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>4. Airflow Providers Used <a href="#showcase" class="anchor-link">#</a></h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: var(--accent2);">4.1 Database Provider</h3>
+                    <p style="font-size: 12px;"><strong>Package:</strong> <code>apache-airflow-providers-postgres</code>
+                    </p>
+                    <p style="font-size: 12px;"><strong>Component:</strong> <code>PostgresHook</code></p>
+                    <p style="font-size: 12px;"><strong>Purpose:</strong> Connect to PostgreSQL, execute queries, fetch
+                        data.</p>
+                </div>
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: var(--accent2);">4.2 File Provider</h3>
+                    <p style="font-size: 12px;"><strong>Component:</strong> <code>FileSensor</code></p>
+                    <p style="font-size: 12px;"><strong>Purpose:</strong> Wait until a file exists before proceeding.
+                        Handles asynchronous dependencies.</p>
+                </div>
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: var(--accent2);">4.3 AWS Provider</h3>
+                    <p style="font-size: 12px;"><strong>Package:</strong> <code>apache-airflow-providers-amazon</code>
+                    </p>
+                    <p style="font-size: 12px;"><strong>Component:</strong> <code>S3Hook</code></p>
+                    <p style="font-size: 12px;"><strong>Note:</strong> Uses LocalStack for local AWS simulation.</p>
+                </div>
+                <div class="card" style="margin: 0;">
+                    <h3 style="color: var(--accent2);">4.4 Google Cloud Provider</h3>
+                    <p style="font-size: 12px;"><strong>Package:</strong> <code>apache-airflow-providers-google</code>
+                    </p>
+                    <p style="font-size: 12px;"><strong>Components:</strong> <code>BigQueryInsertJobOperator</code>,
+                        <code>GCSHook</code></p>
+                </div>
+            </div>
+
+            <h2>5. Core Concepts Demonstrated <a href="#showcase" class="anchor-link">#</a></h2>
+            <div class="card">
+                <p><strong>5.1 Hooks:</strong> Provide low-level access to external systems. Example:
+                    <code>PostgresHook(postgres_conn_id="postgres_default")</code>.</p>
+                <p><strong>5.2 Operators:</strong> Represent tasks in a DAG. Examples: Python tasks
+                    (<code>@task</code>), S3 upload logic, BigQuery job execution.</p>
+                <p><strong>5.3 Sensors:</strong> Wait for a condition before proceeding. Example:
+                    <code>FileSensor(...)</code> for file availability checks.</p>
+            </div>
+
+            <h2>6. DAG Configuration <a href="#showcase" class="anchor-link">#</a></h2>
+            <div class="card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>DAG ID</td>
+                            <td><code>providers_showcase_pipeline</code></td>
+                        </tr>
+                        <tr>
+                            <td>Schedule</td>
+                            <td><code>@daily</code></td>
+                        </tr>
+                        <tr>
+                            <td>Start Date</td>
+                            <td>2026-01-01</td>
+                        </tr>
+                        <tr>
+                            <td>Catchup</td>
+                            <td>Disabled</td>
+                        </tr>
+                        <tr>
+                            <td>Retries</td>
+                            <td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>7. Task Breakdown <a href="#showcase" class="anchor-link">#</a></h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.1 setup_workspace</h4>
+                    <p style="font-size: 12px;">Creates shared working directory: <code>/tmp/providers_showcase</code>
+                    </p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.2 extract_from_postgres</h4>
+                    <p style="font-size: 12px;">Fetches latest records from DB. Fallback: Generates sample data if DB
+                        unavailable.</p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.3 save_data_to_file</h4>
+                    <p style="font-size: 12px;">Converts data into CSV. Path:
+                        <code>/tmp/providers_showcase/sensor_metrics.csv</code></p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.4 wait_for_csv_file</h4>
+                    <p style="font-size: 12px;"><strong>FileSensor:</strong> Mode: <code>reschedule</code>, Interval:
+                        10s, Timeout: 120s.</p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.5 simulate_s3_upload</h4>
+                    <p style="font-size: 12px;">Uploads to S3 via <code>S3Hook</code>. Target:
+                        <code>s3://my-local-bucket/sensor-data/</code></p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.6 simulate_bigquery_load</h4>
+                    <p style="font-size: 12px;">Reads CSV and simulates BigQuery aggregation. Returns metadata.</p>
+                </div>
+                <div class="card" style="margin: 0; padding: 16px;">
+                    <h4 style="color: var(--accent2); font-size: 14px;">7.7 generate_providers_report</h4>
+                    <p style="font-size: 12px;">Generates execution summary report in
+                        <code>/tmp/providers_showcase/providers_report.txt</code></p>
+                </div>
+            </div>
+
+            <h2>8. Data Flow <a href="#showcase" class="anchor-link">#</a></h2>
+            <div class="card">
+                <p><strong>Input:</strong> PostgreSQL table <code>processed_sensor_metrics</code></p>
+                <p><strong>Intermediate:</strong> Local CSV file</p>
+                <p><strong>Output:</strong> S3 object (LocalStack), BigQuery simulation result, Text report</p>
+            </div>
+
+            <div class="grid2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 16px;">
+                <div class="card">
+                    <h3 style="margin-top: 0;">9. Error Handling <a href="#showcase" class="anchor-link">#</a></h3>
+                    <ul style="font-size: 12px;">
+                        <li><strong>DB unavailable:</strong> Use sample data</li>
+                        <li><strong>S3 failure:</strong> Switch to simulation</li>
+                        <li><strong>Missing file:</strong> Soft fail in sensor</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h3 style="margin-top: 0;">10. Key Features <a href="#showcase" class="anchor-link">#</a></h3>
+                    <ul style="font-size: 12px;">
+                        <li>Multi-provider integration</li>
+                        <li>Fault-tolerant execution</li>
+                        <li>Real + simulated hybrid pipeline</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout note">
+                <div>
+                    <strong>11. Production Equivalent:</strong> In production, local files are replaced by S3/GCS,
+                    simulations by real BigQuery jobs, and LocalStack by actual cloud platforms.
+                </div>
+            </div>
+
+            <h2>12. Dependencies <a href="#showcase" class="anchor-link">#</a></h2>
+            <div class="code-block">pip install apache-airflow-providers-postgres
+                pip install apache-airflow-providers-amazon
+                pip install apache-airflow-providers-google</div>
+
+            <h2>13. Future Enhancements <a href="#showcase" class="anchor-link">#</a></h2>
+            <div class="card">
+                <ul style="margin-bottom: 0;">
+                    <li>Replace simulation with real GCP integration</li>
+                    <li>Add MLflow model tracking</li>
+                    <li>Integrate Slack/email alerts</li>
+                    <li>Add data validation checks</li>
+                </ul>
+            </div>
+
+            <div class="card" style="border-top: 4px solid var(--accent);">
+                <h3 style="margin-top: 0;">14. Conclusion</h3>
+                <p>This DAG serves as a foundational example for building scalable ETL and MLOps pipelines,
+                    demonstrating how Airflow providers enable seamless integration across databases, file systems, and
+                    cloud storage.</p>
+            </div>
+        </div>
+
+        <div class="section" id="exploration">
+            <h1>The Ultimate Airflow Operator Library</h1>
+            <p class="subtitle">A structured learning directory of the most essential operators in the Airflow
+                ecosystem.</p>
+
+            <div class="card" style="margin-bottom: 24px;">
+                <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;">
+                    <div style="flex: 1; min-width: 250px; position: relative;">
+                        <input type="text" id="op-search" placeholder="Search operators (e.g. S3, SQL, Python)..."
+                            style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font-size: 14px;">
+                    </div>
+                    <div id="filter-container" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="core">Core</button>
+                        <button class="filter-btn" data-filter="aws">AWS</button>
+                        <button class="filter-btn" data-filter="gcp">GCP</button>
+                        <button class="filter-btn" data-filter="db">Databases</button>
+                        <button class="filter-btn" data-filter="msg">Messaging</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="operator-directory"
+                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+                <!-- Core -->
+                <div class="card op-card" data-cat="core" style="border-top: 3px solid var(--green);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">⚡ Core Logic</h3>
+                        <span class="badge badge-green">Essential</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Execute arbitrary Python code"><code>PythonOperator</code> <small> / @task</small>
+                        </li>
+                        <li title="Execute shell commands"><code>BashOperator</code></li>
+                        <li title="Logic-based DAG path switching"><code>BranchPythonOperator</code></li>
+                        <li title="Skip downstream if condition is false"><code>ShortCircuitOperator</code></li>
+                        <li title="Placeholder for testing/structure"><code>EmptyOperator</code></li>
+                        <li title="Triggers another DAG pipeline"><code>TriggerDagRunOperator</code></li>
+                    </ul>
+                </div>
+
+                <!-- AWS -->
+                <div class="card op-card" data-cat="aws" style="border-top: 3px solid var(--amber);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">☁️ Amazon Web Services</h3>
+                        <span class="badge badge-amber">Popular</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Upload/Download/List S3 files"><code>S3Hook</code> / <code>S3ListOperator</code></li>
+                        <li title="Bulk load S3 data into Redshift"><code>S3ToRedshiftOperator</code></li>
+                        <li title="Managed Spark steps on EMR clusters"><code>EmrAddStepsOperator</code></li>
+                        <li title="Run SageMaker ML training jobs"><code>SageMakerTrainingOperator</code></li>
+                        <li title="Trigger serverless Lambda functions"><code>LambdaInvokeFunctionOperator</code></li>
+                        <li title="Load files from SFTP to S3"><code>SFTPToS3Operator</code></li>
+                    </ul>
+                </div>
+
+                <!-- GCP -->
+                <div class="card op-card" data-cat="gcp" style="border-top: 3px solid var(--cyan);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">☁️ Google Cloud</h3>
+                        <span class="badge badge-cyan">Cloud</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Execute/Insert BigQuery Jobs"><code>BigQueryInsertJobOperator</code></li>
+                        <li title="Transfer GCS files to BigQuery tables"><code>GCSToBigQueryOperator</code></li>
+                        <li title="Create/Delete GCS Storage buckets"><code>GCSCreateBucketOperator</code></li>
+                        <li title="Run Vertex AI Pipeline tasks"><code>VertexAITrainingJobRunOperator</code></li>
+                        <li title="Execute Google Cloud Run jobs"><code>CloudRunExecuteJobOperator</code></li>
+                        <li title="Sync data between GCS and S3"><code>GCSToS3Operator</code></li>
+                    </ul>
+                </div>
+
+                <!-- Databases -->
+                <div class="card op-card" data-cat="db" style="border-top: 3px solid var(--accent);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">🗄️ Relational DBs</h3>
+                        <span class="badge badge-blue">SQL</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Universal SQL executor (The Modern Standard)"><code>SQLExecuteQueryOperator</code>
+                        </li>
+                        <li title="Native Postgres query terminal"><code>PostgresOperator</code></li>
+                        <li title="High-scale warehouse execution"><code>SnowflakeOperator</code></li>
+                        <li title="Generic JDBC driver connector"><code>JdbcOperator</code></li>
+                        <li title="Validate data quality with Boolean SQL"><code>SQLCheckOperator</code></li>
+                        <li title="Transfer between SQL DBs"><code>GenericTransfer</code></li>
+                    </ul>
+                </div>
+
+                <!-- Messaging -->
+                <div class="card op-card" data-cat="msg" style="border-top: 3px solid var(--red);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">💬 Notifications</h3>
+                        <span class="badge badge-red"
+                            style="background: rgba(239, 68, 68, 0.1); color: var(--red);">Alerts</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Send SMTP based emails"><code>EmailOperator</code></li>
+                        <li title="Post messages to Slack channels"><code>SlackSendMessageOperator</code></li>
+                        <li title="Discord Webhook integration"><code>DiscordWebhookOperator</code></li>
+                        <li title="Telegram Bot notifications"><code>TelegramOperator</code></li>
+                        <li title="Microsoft Teams messaging"><code>MSTeamsWebhookOperator</code></li>
+                        <li title="Mobile Push notifications"><code>SnsPublishOperator</code></li>
+                    </ul>
+                </div>
+
+                <!-- Big Data -->
+                <div class="card op-card" data-cat="core" style="border-top: 3px solid var(--cyan);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="margin: 0;">🏗️ Data & Transformations</h3>
+                        <span class="badge badge-cyan">Big Data</span>
+                    </div>
+                    <ul style="list-style: none; font-size: 13px;">
+                        <li title="Run remote Spark jobs via spark-submit"><code>SparkSubmitOperator</code></li>
+                        <li title="Trigger Databricks notebook jobs"><code>DatabricksRunNowOperator</code></li>
+                        <li title="Trino (Presto) distributed SQL"><code>TrinoOperator</code></li>
+                        <li title="dbt Cloud job execution"><code>DbtCloudRunJobOperator</code></li>
+                        <li title="Data validation framework"><code>GreatExpectationsOperator</code></li>
+                        <li title="Kubernetes Pod execution"><code>KubernetesPodOperator</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <style>
+                .filter-btn {
+                    padding: 6px 14px;
+                    border-radius: 20px;
+                    border: 1px solid var(--border);
+                    background: var(--bg3);
+                    color: var(--text2);
+                    font-size: 12px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+
+                .filter-btn:hover {
+                    border-color: var(--accent);
+                    color: var(--text);
+                }
+
+                .filter-btn.active {
+                    background: var(--accent);
+                    border-color: var(--accent);
+                    color: white;
+                }
+
+                .op-card li {
+                    padding: 6px 0;
+                    border-bottom: 1px solid var(--glass);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .op-card li:last-child {
+                    border-bottom: none;
+                }
+
+                .op-card code {
+                    font-family: 'JetBrains Mono', monospace;
+                    color: var(--accent2);
+                    font-size: 11px;
+                }
+
+                .op-card small {
+                    color: var(--text3);
+                    font-size: 10px;
+                    margin-left: auto;
+                }
+            </style>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const searchInput = document.getElementById('op-search');
+                    const filterBtns = document.querySelectorAll('.filter-btn');
+                    const opCards = document.querySelectorAll('.op-card');
+
+                    const filterOps = () => {
+                        const query = searchInput.value.toLowerCase();
+                        const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+
+                        opCards.forEach(card => {
+                            const cat = card.dataset.cat;
+                            const text = card.textContent.toLowerCase();
+                            const matchesSearch = text.includes(query);
+                            const matchesFilter = activeFilter === 'all' || cat === activeFilter;
+
+                            if (matchesSearch && matchesFilter) {
+                                card.style.display = 'block';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    };
+
+                    searchInput.addEventListener('input', filterOps);
+
+                    filterBtns.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            filterBtns.forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            filterOps();
+                        });
+                    });
+                });
+            </script>
+        </div>
+
+        <!-- S3 DEEP DIVE GUIDE -->
+        <div class="section" id="s3-guide">
+            <h1>🪣 AWS S3 Operator Master Guide</h1>
+            <p class="subtitle">Deep dive into the Amazon S3 provider: <code>airflow.providers.amazon.aws</code></p>
+
+            <div class="grid2" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px;">
+                <!-- Section 1 & 2 -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="card" style="margin: 0; border-left: 4px solid var(--amber);">
+                        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">🔹 1. Core S3 Operators
+                            <span class="badge badge-amber" style="font-size: 9px;">Essential</span></h3>
+                        <p style="font-size: 11px; color: var(--text3); margin-top: -8px;">Bucket & Object Management
+                        </p>
+                        <ul style="list-style: none; font-size: 13px; margin-top: 10px;">
+                            <li><code>S3CreateBucketOperator</code></li>
+                            <li><code>S3DeleteBucketOperator</code></li>
+                            <li><code>S3ListOperator</code></li>
+                            <li><code>S3CopyObjectOperator</code></li>
+                            <li><code>S3DeleteObjectsOperator</code></li>
+                        </ul>
+                        <div class="callout note" style="margin-top: 10px; padding: 8px; font-size: 11px;">
+                            <strong>Use Case:</strong> Lifecycle management of datasets and raw storage buckets.
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin: 0; border-left: 4px solid var(--cyan);">
+                        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">🔹 2. Data Movement
+                        </h3>
+                        <p style="font-size: 11px; color: var(--text3); margin-top: -8px;">Between Systems</p>
+                        <ul style="list-style: none; font-size: 13px; margin-top: 10px;">
+                            <li><code>LocalFilesystemToS3Operator</code></li>
+                            <li><code>S3ToLocalFilesystemOperator</code></li>
+                            <li><code>S3ToSFTPOperator</code></li>
+                            <li><code>SFTPToS3Operator</code></li>
+                        </ul>
+                        <div class="callout note" style="margin-top: 10px; padding: 8px; font-size: 11px;">
+                            <strong>Use Case:</strong> Ingesting local logs or syncing with legacy FTP/SFTP servers.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3, 4, 5 -->
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="card" style="margin: 0; border-left: 4px solid var(--green);">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">🔹 4. Sensors <span
+                                    class="badge badge-green">Very Important 🔥</span></h3>
+                        </div>
+                        <p style="font-size: 11px; color: var(--text3); margin-top: 2px;">Used in Real Pipelines</p>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                            <div style="padding: 10px; background: var(--bg4); border-radius: 8px;">
+                                <code
+                                    style="color: var(--accent2); font-size: 12px; font-weight: bold;">S3KeySensor ✅</code>
+                                <p style="font-size: 11px; margin-top: 4px;">Wait for specific file(s) to arrive in a
+                                    bucket.</p>
+                            </div>
+                            <div style="padding: 10px; background: var(--bg4); border-radius: 8px;">
+                                <code style="color: var(--text2); font-size: 12px;">S3PrefixSensor</code>
+                                <p style="font-size: 11px; margin-top: 4px;">Wait until any file with a prefix exists.
+                                </p>
+                            </div>
+                        </div>
+                        <p style="font-size: 12px; margin-top: 12px;">Also: <code>S3KeysUnchangedSensor</code> (Checks
+                            for stable uploads).</p>
+                        <div class="callout tip" style="margin-top: 10px; padding: 8px; font-size: 11px;">
+                            <strong>Best Practice:</strong> Always use <code>mode='reschedule'</code> for long-running
+                            sensors to save workers.
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="card" style="margin: 0; border-left: 4px solid var(--accent2);">
+                            <h3 style="margin-top: 0; font-size: 15px;">🔹 3. Processing</h3>
+                            <ul style="list-style: none; font-size: 13px; margin-top: 8px;">
+                                <li><code>S3FileTransformOperator</code></li>
+                            </ul>
+                            <p style="font-size: 11px; color: var(--text3); line-height: 1.4;">Read file &rarr;
+                                Transformation script &rarr; Write back to S3.</p>
+                        </div>
+                        <div class="card" style="margin: 0; border-left: 4px solid var(--text3);">
+                            <h3 style="margin-top: 0; font-size: 15px;">🔹 5. Hooks</h3>
+                            <ul style="list-style: none; font-size: 13px; margin-top: 8px;">
+                                <li><code>S3Hook</code></li>
+                            </ul>
+                            <p style="font-size: 11px; color: var(--text3); line-height: 1.4;">Used internally or inside
+                                <code>PythonOperators</code> for custom logic.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 24px;">
+                <h3>Real-World S3 Flow Example</h3>
+                <div class="flow">
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <div class="flow-step" style="min-width: 140px; font-size: 12px;">S3KeySensor<br><small>Wait for
+                                data.csv</small></div>
+                        <div class="flow-arrow">➜</div>
+                        <div class="flow-step" style="min-width: 140px; font-size: 12px;">S3ToRedshift<br><small>Bulk
+                                Load</small></div>
+                        <div class="flow-arrow">➜</div>
+                        <div class="flow-step" style="min-width: 140px; font-size: 12px;">
+                            S3DeleteObjects<br><small>Cleanup Raw</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATABASE DEEP DIVE GUIDE -->
+        <div class="section" id="db-guide">
+            <h1>🗄️ SQL & Database Operator Master Guide</h1>
+            <p class="subtitle">Mastering Relational Data Flows: <code>airflow.providers.common.sql</code></p>
+
+            <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px;">
+                <div class="card">
+                    <h3 style="margin-top: 0;">🔥 Essential SQL Operators</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Operator</th>
+                                <th>Purpose</th>
+                                <th>Provider Package</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>SQLExecuteQuery</code></td>
+                                <td>Universal query executor (Select/Update/Delete)</td>
+                                <td>common.sql</td>
+                            </tr>
+                            <tr>
+                                <td><code>PostgresOperator</code></td>
+                                <td>Optimized for PostgreSQL systems</td>
+                                <td>postgres</td>
+                            </tr>
+                            <tr>
+                                <td><code>SQLCheckOperator</code></td>
+                                <td>Validates data accuracy (returns TRUE/FALSE)</td>
+                                <td>common.sql</td>
+                            </tr>
+                            <tr>
+                                <td><code>SQLValueCheck</code></td>
+                                <td>Checks if query result matches a goal value</td>
+                                <td>common.sql</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="card" style="margin: 0; border-right: 4px solid var(--accent);">
+                        <h3 style="margin: 0;">🔹 Sensors</h3>
+                        <ul style="list-style: none; font-size: 13px; margin-top: 10px;">
+                            <li><code>SqlSensor</code>: Wait for record presence.</li>
+                            <li><code>PostgresSensor</code>: DB-specific polling.</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="margin: 0; border-right: 4px solid var(--accent2);">
+                        <h3 style="margin: 0;">🔹 Hooks</h3>
+                        <ul style="list-style: none; font-size: 13px; margin-top: 10px;">
+                            <li><code>DbApiHook</code> (Generic)</li>
+                            <li><code>PostgresHook</code></li>
+                            <li><code>MySqlHook</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Progress Bar
+        window.addEventListener('scroll', () => {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("progress-bar").style.width = scrolled + "%";
+
+            // Back to top button
+            const btt = document.getElementById('backToTop');
+            if (winScroll > 300) btt.classList.add('visible');
+            else btt.classList.remove('visible');
+        });
+
+        // Sidebar Active State
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('#sidebar-nav li a');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 120) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Initialize Highlighting
+        hljs.highlightAll();
+
+        // Glossary Definitions
+        const GLOSSARY = {
+            'DAG': 'Directed Acyclic Graph: A collection of tasks organized with dependencies.',
+            'MLOps': 'Machine Learning Operations: DevOps-style practices for ML systems.',
+            'MLflow': 'An open-source platform for the machine learning lifecycle.',
+            'PostgreSQL': 'A powerful, open source object-relational database system.',
+            'S3': 'Amazon Simple Storage Service (S3) is an object storage service.',
+            'Flask': 'A micro web framework written in Python.',
+            'BigQuery': 'Google Cloud\'s fully managed, serverless enterprise data warehouse.',
+            'LocalStack': 'A fully functional local AWS cloud stack.',
+            'Provider': 'A package that contains all relevant operators, hooks, and sensors for a specific service.',
+            'Redshift': 'Amazon Redshift is a fully managed, AI-powered cloud data warehouse.',
+            'EMR': 'Amazon Elastic MapReduce (EMR) is a cloud big data platform for processing vast amounts of data using open source tools.',
+            'Lambda': 'AWS Lambda is a serverless, event-driven compute service.',
+            'SNS': 'Amazon Simple Notification Service (SNS) is a fully managed messaging service for both system-to-system and system-to-person communication.',
+            'SQS': 'Amazon Simple Queue Service (SQS) is a fully managed message queuing service.',
+            'Glue': 'AWS Glue is a serverless data integration service that makes it easy to discover, prepare, and combine data.',
+            'SageMaker': 'Amazon SageMaker is a fully managed service that provides every developer and data scientist with the ability to build, train, and deploy ML models.',
+            'Snowflake': 'A cloud computing-based data cloud company.',
+            'SFTP': 'Secure File Transfer Protocol (SFTP) is a secure version of File Transfer Protocol (FTP).',
+            'CSV': 'Comma-Separated Values: A text file that uses a comma to separate values.'
+        };
+
+        function applyGlossary() {
+            const sections = document.querySelectorAll('.section p, .section li, .section .card p');
+            sections.forEach(el => {
+                let html = el.innerHTML;
+                Object.keys(GLOSSARY).forEach(term => {
+                    const regex = new RegExp(`\\b${term}\\b`, 'g');
+                    html = html.replace(regex, `<span class="glossary-term">${term}<span class="glossary-tip">${GLOSSARY[term]}</span></span>`);
+                });
+                el.innerHTML = html;
+            });
+        }
+
+        window.onload = applyGlossary;
+    </script>
+</body>
+
+</html>
