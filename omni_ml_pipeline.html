@@ -1291,12 +1291,17 @@ mermaid.initialize({ startOnLoad: true, theme: 'dark', darkMode: true, backgroun
 <div>
 <strong>Project Summary: What this project is about & what it performs</strong>
 <p style="margin-top: 8px;">
-<strong>Omni ML Pro Pipeline v2</strong> is a production-grade Machine Learning Operations (MLOps) workflow. Its primary objective is to automate and streamline the full lifecycle of machine learning systems, bridging the gap between raw data and AI-driven analysis.
+<strong>Omni ML Pro Pipeline v2</strong> is a production-grade Machine Learning Operations (MLOps) workflow. Its primary objective is to automate and streamline the full lifecycle of machine learning systems. Here is exactly what each task and component does to your data:
 </p>
-<ul style="margin-top: 8px; margin-left: 20px;">
-    <li><strong>Data Orchestration:</strong> Automatically fetches external datasets (e.g., from Kaggle via bash scripts), processes them, and securely stores intermediate and final artifacts in Amazon S3.</li>
-    <li><strong>Hybrid Training & Tracking:</strong> Executes model training locally (utilizing Scikit-Learn with MLflow tracking) while also orchestrating large-scale cloud-based training tasks on Amazon SageMaker.</li>
-    <li><strong>AI Insights & Metadata:</strong> Logs all training run metadata symmetrically to a PostgreSQL database and utilizes Amazon Bedrock (Nova Lite) to generate intelligent, AI-driven model performance reports.</li>
+<ul style="margin-top: 8px; margin-left: 20px; line-height: 1.6;">
+    <li style="margin-bottom: 8px;"><strong>Data Orchestration (Apache Airflow):</strong> Acts as the central brain. It dynamically triggers each stage, validates inputs, and securely manages sensitive service credentials (API keys, AWS roles) without exposing them in the code.</li>
+    <li style="margin-bottom: 8px;"><strong>Data Ingestion (Kaggle API):</strong> Safely downloads the raw, unrefined dataset directly into a secure local environment, preparing it as the foundational input for the rest of the pipeline.</li>
+    <li style="margin-bottom: 8px;"><strong>Data Cleaning & Transformation (Python Pandas):</strong> Restructures the raw data by cleaning column formats, standardizing string variables, and removing irrelevant characters so the dataset is mathematically sound for model training.</li>
+    <li style="margin-bottom: 8px;"><strong>Data Storage & Artifact Management (Amazon S3):</strong> Acts as the central data repository. It securely stores the initial raw dataset, the cleaned and preprocessed dataset, and the final trained model artifacts (like the .pkl file) to guarantee reproducibility.</li>
+    <li style="margin-bottom: 8px;"><strong>Secure IAM Authentication (AWS STS / IAM):</strong> Dynamically generates ephemeral access keys and provisions SageMaker execution roles on the fly, guaranteeing that your data training workloads have isolated, temporary access only to the S3 buckets they need.</li>
+    <li style="margin-bottom: 8px;"><strong>Model Training (Amazon SageMaker & MLflow):</strong> The processed data is pushed to Amazon SageMaker, which spins up a dedicated scikit-learn container and computes the data pattern recognition at scale. A localized training track also preserves every parameter and artifact utilizing MLflow.</li>
+    <li style="margin-bottom: 8px;"><strong>Metadata Tracking (PostgreSQL):</strong> Logs the core numerical metrics of each training iteration (Run ID, accuracy score, and corresponding S3 file paths) into an organized table, offering an auditing trail of how the model’s data output changes over time.</li>
+    <li><strong>AI-Driven Analysis (Amazon Bedrock - Nova Lite):</strong> Appraises overall model quality by cross-referencing the newly trained model's accuracy data against the historical dataset fetched from the PostgreSQL database. This AI conducts logic analysis to flag sudden statistical drops in accuracy, identify potential data drift errors, and dictate whether the pipeline's output requires hyperparameter tuning or immediate retraining before going live.</li>
 </ul>
 </div>
 </div>
