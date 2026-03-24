@@ -1,0 +1,2299 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Omni ML Pro Pipeline v2 - A Generalized Pipeline for Machine Learning Systems">
+    <title>Omni ML Pro Pipeline v2</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+    <!-- highlight.js syntax highlighting -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --bg: #0a0e1a;
+            --bg2: #111827;
+            --bg3: #1a2035;
+            --bg4: #232b42;
+            --text: #e2e8f0;
+            --text2: #94a3b8;
+            --text3: #64748b;
+            --accent: #6366f1;
+            --accent2: #818cf8;
+            --accent3: #4f46e5;
+            --green: #10b981;
+            --red: #ef4444;
+            --amber: #f59e0b;
+            --cyan: #22d3ee;
+            --pink: #ec4899;
+            --border: #1e293b;
+            --glass: rgba(255, 255, 255, 0.03);
+            --radius: 12px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: #6366f1;
+            width: 0%;
+            z-index: 9999;
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            overflow-x: hidden
+        }
+
+        ::selection {
+            background: var(--accent);
+            color: #fff
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg2)
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent3);
+            border-radius: 3px
+        }
+
+
+
+        .sidebar-brand {
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        .nav-list {
+            list-style: none
+        }
+
+        .nav-list li a {
+            display: block;
+            padding: 8px 24px;
+            font-size: 13px;
+            color: var(--text2);
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            transition: all .2s
+        }
+
+        .nav-list li a:hover,
+        .nav-list li a.active {
+            color: var(--accent2);
+            background: var(--glass);
+            border-left-color: var(--accent)
+        }
+
+
+        .section {
+            margin-bottom: 56px;
+            animation: fadeUp .5s ease both
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .subtitle {
+            color: var(--text3);
+            font-size: 15px;
+            margin-bottom: 40px
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--accent3)
+        }
+
+        h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 20px 0 10px
+        }
+
+        p,
+        li {
+            font-size: 14px;
+            color: var(--text2);
+            margin-bottom: 8px
+        }
+
+        ul {
+            padding-left: 20px
+        }
+
+        /* CARDS & TABLES */
+        .card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin: 16px 0;
+            transition: transform .2s, box-shadow .2s
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 13px
+        }
+
+        th {
+            background: var(--bg4);
+            color: var(--accent2);
+            text-align: left;
+            padding: 10px 14px;
+            font-weight: 600;
+            border-bottom: 2px solid var(--accent3)
+        }
+
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text2)
+        }
+
+        tr:hover td {
+            background: var(--glass)
+        }
+
+        /* CODE */
+        .code-block {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12.5px;
+            color: var(--green);
+            overflow-x: auto;
+            margin: 12px 0;
+            line-height: 1.6;
+            white-space: pre-wrap
+        }
+
+        /* FLOW */
+        .flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin: 20px 0
+        }
+
+        .flow-step {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            text-align: center;
+            min-width: 220px;
+            transition: all .2s
+        }
+
+        .flow-step:hover {
+            border-color: var(--accent);
+            background: var(--accent3);
+            color: #fff
+        }
+
+        .flow-step.highlight {
+            border-color: var(--amber);
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber)
+        }
+
+        .flow-arrow {
+            color: var(--accent);
+            font-size: 18px;
+            line-height: 1
+        }
+
+        /* DROPDOWN / ACCORDION */
+        .dropdown {
+            margin: 12px 0
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 18px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 500;
+            transition: all .2s;
+            width: 100%;
+            text-align: left
+        }
+
+        .dropdown-toggle:hover {
+            border-color: var(--accent);
+            background: var(--accent3)
+        }
+
+        .dropdown-toggle .arrow {
+            transition: transform .3s;
+            font-size: 12px;
+            color: var(--accent2)
+        }
+
+        .dropdown-toggle.open .arrow {
+            transform: rotate(180deg)
+        }
+
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s ease;
+            background: var(--bg3);
+            border-radius: 0 0 8px 8px;
+            border: 1px solid var(--border);
+            border-top: none;
+            margin-top: -4px
+        }
+
+        .dropdown-content.open {
+            max-height: 2000px
+        }
+
+        .dropdown-content-inner {
+            padding: 16px 20px
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin: 2px
+        }
+
+        .badge-green {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--green)
+        }
+
+        .badge-red {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red)
+        }
+
+        .badge-amber {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--amber)
+        }
+
+        .badge-blue {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--accent2)
+        }
+
+        .badge-cyan {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--cyan)
+        }
+
+        /* CHART */
+        .chart-container {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin: 16px 0;
+            position: relative
+        }
+
+        .chart-container canvas {
+            max-height: 300px
+        }
+
+        /* GRID */
+        .grid2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .grid3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px
+        }
+
+        .stat-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center
+        }
+
+        .stat-card .num {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        /* ✕ Close button — lives inside sidebar, never overlaps main */
+        .sidebar-close-btn {
+            position: absolute;
+            top: 14px;
+            right: 12px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background .2s, color .2s;
+        }
+
+        .sidebar-close-btn:hover {
+            background: var(--accent3);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* Pull-tab — left edge, only visible when sidebar is closed */
+        .sidebar-open-tab {
+            position: fixed;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            z-index: 300;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 20px;
+            height: 56px;
+            border-radius: 0 8px 8px 0;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width .2s, background .2s;
+            box-shadow: 2px 0 10px rgba(99, 102, 241, .4);
+        }
+
+        .sidebar-open-tab:hover {
+            width: 28px;
+            background: var(--accent3);
+        }
+
+        body.sidebar-open .sidebar-open-tab {
+            display: none;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            padding: 24px 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            z-index: 200;
+            transform: translateX(-100%);
+            transition: transform .35s ease, box-shadow .35s ease;
+            box-shadow: none;
+        }
+
+        body.sidebar-open .sidebar {
+            transform: translateX(0);
+            box-shadow: 4px 0 24px rgba(0, 0, 0, .4);
+        }
+
+        /* MAIN — centered by default, shifts right when sidebar opens */
+        .main {
+            margin: 0 auto;
+            padding: 40px 48px 80px;
+            max-width: 1100px;
+            transition: margin .35s ease;
+        }
+
+        @media(min-width: 901px) {
+            body.sidebar-open .main {
+                margin-left: 280px;
+                margin-right: auto;
+            }
+        }
+
+        .sidebar-brand {
+            position: relative;
+            padding: 0 24px 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px
+        }
+
+        .sidebar-brand h2 {
+            font-size: 16px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent2), var(--cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent
+        }
+
+        .sidebar-brand p {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 4px
+        }
+
+        /* Overlay backdrop (mobile) */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .55);
+            z-index: 150;
+            opacity: 0;
+            transition: opacity .35s;
+        }
+
+        body.sidebar-open .sidebar-overlay {
+            display: block;
+            opacity: 1;
+        }
+
+        @media(min-width:901px) {
+            .sidebar-overlay {
+                display: none !important;
+            }
+        }
+
+        /* RESPONSIVE */
+        @media(max-width:900px) {
+            .main {
+                padding: 64px 20px 80px;
+            }
+
+            .grid2,
+            .grid3 {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ── COPY BUTTON ───────────────────────────────────────── */
+        .code-wrap {
+            position: relative;
+            margin: 12px 0;
+        }
+
+        .code-wrap .code-block {
+            margin: 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border);
+            color: var(--text3);
+            font-size: 11px;
+            padding: 3px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all .2s;
+            z-index: 1;
+        }
+
+        .copy-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .copy-btn.copied {
+            background: var(--green);
+            color: #fff;
+            border-color: var(--green);
+        }
+
+        /* ── BACK TO TOP ───────────────────────────────────────── */
+        .back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 28px;
+            z-index: 500;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, .4);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s, transform .3s;
+            transform: translateY(14px);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background: var(--accent3);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, .6);
+        }
+
+        /* ── READING TIME ──────────────────────────────────────── */
+        .read-time {
+            font-size: 11px;
+            color: var(--text3);
+            margin-left: 10px;
+            padding: 2px 9px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            vertical-align: middle;
+            font-weight: 400;
+        }
+
+        /* ── THEME TOGGLE SWITCH (fixed top-right) ────────────────── */
+        .theme-toggle-wrap {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 400;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle-wrap span {
+            font-size: 11px;
+            color: var(--text3);
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+
+        /* From Uiverse.io by satyamchaudharydev */
+        .switch {
+            display: block;
+            --width-of-switch: 3.5em;
+            --height-of-switch: 2em;
+            --size-of-icon: 1.4em;
+            --slider-offset: 0.3em;
+            position: relative;
+            width: var(--width-of-switch);
+            height: var(--height-of-switch);
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f4f4f5;
+            transition: .4s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: var(--size-of-icon, 1.4em);
+            width: var(--size-of-icon, 1.4em);
+            border-radius: 20px;
+            left: var(--slider-offset, 0.3em);
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(40deg, #ff0080, #ff8c00 70%);
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #303136;
+        }
+
+        input:checked+.slider:before {
+            left: calc(100% - (var(--size-of-icon, 1.4em) + var(--slider-offset, 0.3em)));
+            background: #303136;
+            box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+        }
+
+        /* ── LIGHT MODE VARIABLES ──────────────────────────────── */
+        body.light {
+            --bg: #f0f4f8;
+            --bg2: #ffffff;
+            --bg3: #e8edf5;
+            --bg4: #dde3ee;
+            --text: #0f172a;
+            --text2: #1e293b;
+            --text3: #475569;
+            --border: #b8c4d8;
+            --glass: rgba(0, 0, 0, 0.04);
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+            --green: #059669;
+            --red: #dc2626;
+            --amber: #d97706;
+            --cyan: #0891b2;
+            --pink: #db2777;
+        }
+
+        /* Keep code blocks dark in light mode — better readability */
+        body.light .code-block {
+            background: #1a1e2e;
+            border-color: #2d3555;
+        }
+
+        body.light h1 {
+            background: linear-gradient(135deg, #4f46e5, #0891b2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light #progress-bar {
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+        }
+
+        body.light .sidebar {
+            background: #ffffff;
+            border-right-color: #b8c4d8;
+        }
+
+        body.light .sidebar-brand h2 {
+            background: linear-gradient(135deg, #4f46e5, #0891b2);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        body.light .flow-step {
+            background: #dde3ee;
+            color: #0f172a;
+            border-color: #b8c4d8;
+        }
+
+        body.light .flow-step:hover {
+            background: #6366f1;
+            color: #fff;
+            border-color: #6366f1;
+        }
+
+        body.light .dropdown-toggle {
+            background: #dde3ee;
+            color: #0f172a;
+            border-color: #b8c4d8;
+        }
+
+        body.light .dropdown-content {
+            background: #e8edf5;
+            border-color: #b8c4d8;
+        }
+
+        body.light ::selection {
+            background: #6366f1;
+            color: #fff;
+        }
+
+        /* Switch track visible in light mode */
+        body.light .slider {
+            background-color: #c8d0e0;
+            box-shadow: 0 0 0 1.5px #8896b3;
+        }
+
+        body.light input:checked+.slider {
+            background-color: #303136;
+            box-shadow: none;
+        }
+
+        body.light .theme-toggle-wrap span {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        /* ── CALLOUT / ALERT BOXES ───────────────────────────────────── */
+        .callout {
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin: 16px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .callout-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .callout.tip {
+            background: rgba(16, 185, 129, .1);
+            border-color: var(--green);
+        }
+
+        .callout.note {
+            background: rgba(99, 102, 241, .1);
+            border-color: var(--accent);
+        }
+
+        .callout.warning {
+            background: rgba(245, 158, 11, .1);
+            border-color: var(--amber);
+        }
+
+        .callout.danger {
+            background: rgba(239, 68, 68, .1);
+            border-color: var(--red);
+        }
+
+        .callout strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* ── ANCHOR LINKS ON HEADINGS ─────────────────────────────── */
+        .anchor-link {
+            opacity: 0;
+            margin-left: 8px;
+            font-size: 16px;
+            color: var(--text3);
+            text-decoration: none;
+            transition: opacity .2s;
+            vertical-align: middle;
+        }
+
+        h2:hover .anchor-link,
+        h3:hover .anchor-link {
+            opacity: 1;
+        }
+
+        .anchor-link:hover {
+            color: var(--accent);
+        }
+
+        /* ── ACTIVE SIDEBAR LINK ─────────────────────────────────────── */
+        .nav-list a.active {
+            background: rgba(99, 102, 241, .18) !important;
+            color: #a5b4fc !important;
+            border-left: 3px solid var(--accent);
+            padding-left: 13px;
+            font-weight: 600;
+        }
+
+        /* ── FONT SIZE CONTROLS ──────────────────────────────────────── */
+        .font-ctrl-wrap {
+            position: fixed;
+            bottom: 88px;
+            right: 20px;
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .font-ctrl-btn {
+            width: 36px;
+            height: 36px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+        }
+
+        .font-ctrl-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* ── PRINT BUTTON ────────────────────────────────────────────── */
+        .print-btn {
+            position: fixed;
+            bottom: 178px;
+            right: 20px;
+            z-index: 400;
+            width: 36px;
+            height: 36px;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all .2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+        }
+
+        .print-btn:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* ── GLOSSARY TOOLTIPS ──────────────────────────────────────── */
+        .glossary-term {
+            border-bottom: 1px dashed var(--accent);
+            cursor: help;
+            position: relative;
+        }
+
+        .glossary-tip {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            max-width: 280px;
+            white-space: normal;
+            z-index: 9999;
+            box-shadow: var(--shadow);
+            pointer-events: none;
+            line-height: 1.5;
+        }
+
+        .glossary-tip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--border);
+        }
+
+        .glossary-term:hover .glossary-tip {
+            display: block;
+        }
+
+        /* ── DYNAMIC FONT SIZING OVERRIDES ────────────────────────────── */
+        .main p,
+        .main li {
+            font-size: calc(100% * 14/15);
+        }
+
+        .main h1 {
+            font-size: calc(100% * 36/15);
+            border-bottom: none;
+        }
+
+        .main h2 {
+            font-size: calc(100% * 22/15);
+        }
+
+        .main h3 {
+            font-size: calc(100% * 16/15);
+        }
+
+        .main .subtitle {
+            font-size: 100%;
+        }
+
+        .main th,
+        .main td,
+        .main .badge {
+            font-size: calc(100% * 13/15);
+        }
+
+        .main .code-block,
+        .main .code-wrap,
+        .main .hljs {
+            font-size: calc(100% * 13/15) !important;
+        }
+
+        .main .callout {
+            font-size: calc(100% * 14/15);
+        }
+
+
+        /* ── PAGE STATS FOOTER ────────────────────────────────────────── */
+        .page-stats-footer {
+            text-align: center;
+            padding: 28px 20px;
+            color: var(--text3);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+            line-height: 2;
+        }
+
+        .page-stats-footer span {
+            margin: 0 10px;
+            padding: 3px 10px;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+        }
+
+        /* ── BOOKMARK BUTTON ─────────────────────────────────────────── */
+        .section-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .section-header-row h2 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .bookmark-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text3);
+            font-size: 15px;
+            padding: 3px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all .2s;
+            flex-shrink: 0;
+        }
+
+        .bookmark-btn:hover,
+        .bookmark-btn.active {
+            background: var(--amber);
+            color: #fff;
+            border-color: var(--amber);
+        }
+
+        /* ── HIGHLIGHT.JS OVERRIDE ─────────────────────────────────────── */
+        .hljs {
+            background: var(--bg3) !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            font-size: 13px !important;
+            font-family: 'JetBrains Mono', monospace !important;
+        }
+
+        body.light .hljs {
+            background: #1a1e2e !important;
+        }
+
+        /* ── LANGUAGE LABEL ON CODE BLOCKS ──────────────────────────── */
+        .lang-label {
+            position: absolute;
+            top: 6px;
+            left: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 4px;
+            color: #fff;
+            z-index: 2;
+        }
+
+        .lang-python {
+            background: #3572A5;
+        }
+
+        .lang-yaml {
+            background: #cb171e;
+        }
+
+        .lang-bash {
+            background: #4d7a6a;
+        }
+
+        .lang-text {
+            background: #555;
+        }
+
+        .lang-json {
+            background: #f1e05a;
+            color: #333;
+        }
+
+        /* Push copy button right when lang label is present */
+        .code-wrap.has-lang .copy-btn {
+            right: 8px;
+        }
+
+        /* ── LAST UPDATED BADGE ───────────────────────────────────────── */
+        .last-updated {
+            display: inline-block;
+            font-size: 11px;
+            color: var(--text3);
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 12px;
+            margin-bottom: 18px;
+        }
+
+        /* ── PRINT STYLES ─────────────────────────────────────────────── */
+        @media print {
+
+            .sidebar,
+            .theme-toggle-wrap,
+            .back-to-top,
+            .font-ctrl-wrap,
+            .print-btn,
+            .sidebar-open-tab,
+            .progress-bar-wrap {
+                display: none !important;
+            }
+
+            .main {
+                margin: 0 !important;
+                padding: 20px !important;
+                max-width: 100% !important;
+            }
+
+            .section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .code-block {
+                background: #f5f5f5 !important;
+                color: #111 !important;
+                border: 1px solid #ccc;
+            }
+
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            a {
+                color: #4f46e5;
+            }
+        }
+    </style>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+mermaid.initialize({ startOnLoad: true, theme: 'dark', darkMode: true, background: 'transparent' });
+</script>
+</head>
+
+<body>
+    <!-- Pull-tab: opens sidebar when it's closed -->
+    <button class="sidebar-open-tab" onclick="toggleSidebar()" aria-label="Open sidebar" title="Open sidebar">☰</button>
+
+    <!-- Mobile backdrop -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Fixed top-right theme toggle switch -->
+    <div class="theme-toggle-wrap" title="Toggle light / dark mode">
+        <span id="themeLabel">Light</span>
+        <label class="switch" aria-label="Toggle theme">
+            <input type="checkbox" id="themeCheckbox" onchange="toggleTheme()">
+            <span class="slider"></span>
+        </label>
+        <span id="themeLabelDark">Dark</span>
+    </div>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <h2>Omni ML Pro Pipeline</h2>
+            <p>End-to-end Architecture Documentation</p>
+            <!-- Close button inside sidebar -->
+            <button class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close sidebar"
+                title="Close sidebar">✕</button>
+        </div>
+        <div style="padding: 0 24px 16px; position:relative;">
+            <input type="text" id="searchInput" placeholder="Search documentation..."
+                style="width:100%; padding:10px 36px 10px 10px; border-radius:6px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-size:13px; outline:none; transition:border-color .2s;"
+                oninput="debouncedSearch()" onkeydown="if(event.key==='Escape'){clearSearch();}">
+            <button id="searchClear" onclick="clearSearch()" title="Clear"
+                style="display:none; position:absolute; right:30px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text3); font-size:16px; cursor:pointer; line-height:1; padding:4px;">&#x2715;</button>
+            <div id="searchCount"
+                style="font-size:11px; color:var(--text3); margin-top:5px; padding-left:2px; min-height:16px;"></div>
+        </div>
+        <ul class="nav-list" id="navList">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#overview">📌 Overview</a></li>
+    <li><a href="#pipeline-architecture-diagram">🗺️ Pipeline Architecture Diagram</a></li>
+    <li><a href="#configuration">⚙️ Configuration</a></li>
+    <li><a href="#pipeline-steps-detailed-breakdown">📋 Pipeline Steps — Detailed Breakdown</a></li>
+    <li><a href="#task-dependency-graph">🔀 Task Dependency Graph</a></li>
+    <li><a href="#checklist-before-first-run">✅ Checklist Before First Run</a></li>
+    <li><a href="#security-design">🔑 Security Design</a></li>
+</ul>
+
+    </nav>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+        aria-label="Back to top" title="Back to top">&#8679;</button>
+
+    <!-- Font size controls -->
+    <div class="font-ctrl-wrap" title="Adjust font size">
+        <button class="font-ctrl-btn" onclick="changeFontSize(1)" title="Increase font size">A+</button>
+        <button class="font-ctrl-btn" onclick="changeFontSize(-1)" title="Decrease font size">A-</button>
+    </div>
+
+    <!-- Print / PDF button -->
+    <button class="print-btn" onclick="window.print()" title="Print / Export PDF">&#128438;</button>
+
+    <main class="main">
+<section class="section" id="overview">
+<h1>🚀 Omni ML Pro Pipeline v2 — Full Documentation</h1>
+<div class="callout note">
+<div class="callout-icon">ℹ️</div>
+<div>
+<strong>DAG Details</strong>
+<p>
+<strong>DAG ID:</strong>: `omni_ml_pro_pipeline_v2`  
+> **File**: [dags/omni_ml_pipeline.py](file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py)  
+> **Region**: `us-east-1`  
+> **Schedule**: Manual trigger only (`schedule=None`)</p>
+</div>
+</div>
+
+<hr />
+</section>
+<section class="section" id="overview">
+<h2>📌 Overview</h2>
+<p>A production-grade, end-to-end MLOps pipeline built on <strong>Apache Airflow 3.x</strong> that orchestrates the full ML lifecycle — from raw data ingestion all the way to AI-powered analysis. All AWS credentials are managed securely through Airflow Connections, never hardcoded.</p>
+<h3>🔧 Tech Stack</h3>
+<table class="table">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Orchestration</strong></td>
+<td>Apache Airflow 3.x (Docker)</td>
+</tr>
+<tr>
+<td><strong>Data Source</strong></td>
+<td>Kaggle API (<code>uciml/iris</code>)</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>Amazon S3 (<code>us-east-1</code>)</td>
+</tr>
+<tr>
+<td><strong>Local Training</strong></td>
+<td>scikit-learn + MLflow</td>
+</tr>
+<tr>
+<td><strong>Cloud Training</strong></td>
+<td>Amazon SageMaker</td>
+</tr>
+<tr>
+<td><strong>AI Analysis</strong></td>
+<td>Amazon Bedrock (Nova Lite)</td>
+</tr>
+<tr>
+<td><strong>Metadata Store</strong></td>
+<td>PostgreSQL</td>
+</tr>
+<tr>
+<td><strong>Connection Security</strong></td>
+<td>Airflow Hooks (<code>aws_real</code>, <code>postgres_default</code>)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</section>
+<section class="section" id="pipeline-architecture-diagram">
+<h2>🗺️ Pipeline Architecture Diagram</h2>
+<div class="card" style="text-align:center; background:var(--bg3); overflow:hidden; border:1px solid var(--border); padding:20px"><pre class="mermaid">flowchart TD
+    A([🟢 DAG Trigger]) --&gt; B
+
+    subgraph INGEST[&quot;📥 Data Ingestion&quot;]
+        B[fetch_kaggle_data\nBashOperator\nKaggle CLI → iris.csv]
+        B --&gt; C[create_s3_bucket\nS3CreateBucketOperator]
+        C --&gt; D[upload_raw_to_s3\nLocalFilesystemToS3Operator\ndata/raw/iris.csv]
+        D --&gt; E[preprocess_data\nBashOperator\nscripts/preprocess.py]
+        E --&gt; F[upload_processed_to_s3\nLocalFilesystemToS3Operator\ndata/processed/iris.csv]
+    end
+
+    subgraph DB[&quot;🗄️ Database Setup&quot;]
+        F --&gt; G[init_ml_runs_table\nSQLExecuteQueryOperator\nPostgres]
+    end
+
+    subgraph LOCAL[&quot;🤖 Local Training&quot;]
+        F --&gt; H[train_and_track\n@task\nRandomForest + MLflow]
+        H --&gt; I[upload_model_to_s3\n@task S3Hook\nmodels/run_id/model.pkl]
+        I --&gt; J[insert_run_to_postgres\n@task PostgresHook\nml_runs table]
+    end
+
+    subgraph CLOUD[&quot;☁️ Cloud Training&quot;]
+        F --&gt; K[train_sagemaker\n@task AwsBaseHook\nSageMaker Job]
+    end
+
+    subgraph AI[&quot;🧠 AI Analysis&quot;]
+        I --&gt; L[bedrock_analysis\n@task boto3\nNova Lite v1]
+    end
+
+    G -.-&gt;|table ready| H
+    J --&gt; M([✅ Pipeline Complete])
+    K --&gt; M
+    L --&gt; M
+
+    style INGEST fill:#1a3a5c,stroke:#4a9eff,color:#fff
+    style DB fill:#2d4a2d,stroke:#4aff4a,color:#fff
+    style LOCAL fill:#4a2d4a,stroke:#ff4aff,color:#fff
+    style CLOUD fill:#4a3a1a,stroke:#ffaa4a,color:#fff
+    style AI fill:#3a1a1a,stroke:#ff4a4a,color:#fff
+</pre></div>
+<hr />
+</section>
+<section class="section" id="configuration">
+<h2>⚙️ Configuration</h2>
+<h3><a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py">dags/omni_ml_pipeline.py</a> — Top-level Constants</h3>
+<div class="code-block language-python">AWS_CONN_ID    = &quot;aws_real&quot;           # Airflow connection → .env AIRFLOW_CONN_AWS_REAL
+POSTGRES_CONN_ID = &quot;postgres_default&quot; # Airflow connection → docker-compose postgres service
+AWS_REGION     = &quot;us-east-1&quot;          # All AWS services unified to one region
+
+MLFLOW_TRACKING_URI = os.getenv(&quot;MLFLOW_TRACKING_URI&quot;, &quot;http://mlflow:5000&quot;)
+S3_BUCKET  = Variable.get(&quot;omni_ml_s3_bucket&quot;, default=&quot;omni-ml-pipeline-us-east-1&quot;)
+KAGGLE_DATASET = &quot;uciml/iris&quot;
+
+LOCAL_DATA_DIR = &quot;/opt/airflow/data&quot;
+RAW_FILE       = f&quot;{LOCAL_DATA_DIR}/iris.csv&quot;
+PROCESSED_FILE = f&quot;{LOCAL_DATA_DIR}/iris_processed.csv&quot;
+MODEL_FILE     = f&quot;{LOCAL_DATA_DIR}/model.pkl&quot;
+</div>
+<h3><a href="file:///c:/Users/modiv/Downloads/kol/.env">.env</a> — Docker Environment</h3>
+<div class="code-block language-env">AIRFLOW_UID=50000
+_PIP_ADDITIONAL_REQUIREMENTS=apache-airflow-providers-postgres apache-airflow-providers-amazon \
+  mlflow scikit-learn kaggle boto3 pandas joblib psycopg2-binary
+
+# Kaggle credentials (auto-loaded as Airflow Variables)
+AIRFLOW_VAR_KAGGLE_USERNAME=vanshmodin
+AIRFLOW_VAR_KAGGLE_KEY=&lt;your_kaggle_api_key&gt;
+
+# AWS connection string (auto-registers as conn_id=aws_real)
+AIRFLOW_CONN_AWS_REAL=aws://ACCESS_KEY:SECRET_KEY@/
+AWS_DEFAULT_REGION=us-east-1
+
+# Raw AWS credentials for deployment API container
+AWS_ACCESS_KEY_ID=&lt;your_key&gt;
+AWS_SECRET_ACCESS_KEY=&lt;your_secret&gt;
+</div>
+<blockquote>
+<p><strong>How <code>AIRFLOW_CONN_AWS_REAL</code> works</strong>: Airflow reads any <code>AIRFLOW_CONN_&lt;ID_UPPERCASE&gt;</code> env var and registers it as a connection with <code>conn_id = aws_real</code>. No manual UI setup needed.</p>
+</blockquote>
+<hr />
+</section>
+<section class="section" id="pipeline-steps-detailed-breakdown">
+<h2>📋 Pipeline Steps — Detailed Breakdown</h2>
+<hr />
+<h3>Step 1 — <code>fetch_kaggle_data</code> (BashOperator)</h3>
+<p>Downloads the Iris dataset from Kaggle using the CLI.</p>
+<div class="code-block language-python">fetch_data = BashOperator(
+    task_id=&quot;fetch_kaggle_data&quot;,
+    bash_command=f&quot;&quot;&quot;
+        python -m pip install -q kaggle &amp;&amp;
+        export PATH=$PATH:~/.local/bin &amp;&amp;
+        mkdir -p {LOCAL_DATA_DIR} &amp;&amp;
+        kaggle datasets download -d {KAGGLE_DATASET} -p {LOCAL_DATA_DIR} --unzip
+    &quot;&quot;&quot;,
+    env={
+        &quot;KAGGLE_USERNAME&quot;: Variable.get(&quot;KAGGLE_USERNAME&quot;, default=&quot;vanshmodin&quot;),
+        &quot;KAGGLE_KEY&quot;:      Variable.get(&quot;KAGGLE_KEY&quot;, default=&quot;&quot;),
+    },
+)
+</div>
+<p><strong>Key design decisions:</strong>
+- Installs <code>kaggle</code> via pip at runtime (already in <code>_PIP_ADDITIONAL_REQUIREMENTS</code> but ensures freshness)
+- Explicitly exports <code>~/.local/bin</code> to <code>$PATH</code> since Kaggle CLI binary isn't on the default container path
+- Credentials passed via <code>env={}</code> from Airflow Variables — never hardcoded</p>
+<p><strong>Output</strong>: <code>/opt/airflow/data/iris.csv</code></p>
+<hr />
+<h3>Step 2 — <code>create_s3_bucket</code> (S3CreateBucketOperator)</h3>
+<p>Creates the S3 bucket in <code>us-east-1</code>. Safe to re-run (idempotent).</p>
+<div class="code-block language-python">create_bucket = S3CreateBucketOperator(
+    task_id=&quot;create_s3_bucket&quot;,
+    bucket_name=S3_BUCKET,           # &quot;omni-ml-pipeline-us-east-1&quot;
+    aws_conn_id=AWS_CONN_ID,         # Uses aws_real connection
+    region_name=AWS_REGION,          # us-east-1
+)
+</div>
+<blockquote>
+<p>⚠️ S3 bucket names are <strong>region-locked</strong> at creation. Always use the same region throughout the pipeline.</p>
+</blockquote>
+<hr />
+<h3>Step 3 — <code>upload_raw_to_s3</code> (LocalFilesystemToS3Operator)</h3>
+<p>Uploads the raw Iris CSV to S3.</p>
+<div class="code-block language-python">upload_raw = LocalFilesystemToS3Operator(
+    task_id=&quot;upload_raw_to_s3&quot;,
+    filename=RAW_FILE,               # /opt/airflow/data/iris.csv
+    dest_bucket=S3_BUCKET,
+    dest_key=&quot;data/raw/iris.csv&quot;,
+    aws_conn_id=AWS_CONN_ID,
+    replace=True,
+)
+</div>
+<p><strong>S3 path</strong>: <code>s3://omni-ml-pipeline-us-east-1/data/raw/iris.csv</code></p>
+<hr />
+<h3>Step 4 — <code>preprocess_data</code> (BashOperator → <a href="file:///c:/Users/modiv/Downloads/kol/scripts/preprocess.py">scripts/preprocess.py</a>)</h3>
+<p>Preprocesses the raw CSV using a dedicated Python script.</p>
+<div class="code-block language-python">preprocess = BashOperator(
+    task_id=&quot;preprocess_data&quot;,
+    bash_command=f&quot;python /opt/airflow/scripts/preprocess.py {RAW_FILE} {PROCESSED_FILE}&quot;,
+)
+</div>
+<h4><a href="file:///c:/Users/modiv/Downloads/kol/scripts/preprocess.py">scripts/preprocess.py</a> — Full Script</h4>
+<div class="code-block language-python">import pandas as pd
+import sys, os
+
+def preprocess(input_path, output_path):
+    df = pd.read_csv(input_path)
+
+    # 1. Clean column names: lowercase, remove 'cm', replace dots with underscores
+    df.columns = [c.lower().replace('cm','').replace('.','_').strip() for c in df.columns]
+
+    # 2. Strip &quot;Iris-&quot; prefix from species labels (e.g. &quot;Iris-setosa&quot; → &quot;setosa&quot;)
+    if 'species' in df.columns:
+        df['species'] = df['species'].str.replace('Iris-', '')
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    df.to_csv(output_path, index=False)
+    print(f&quot;Saved processed data to {output_path}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    preprocess(sys.argv[1], sys.argv[2])
+</div>
+<p><strong>Transformations applied:</strong>
+| Column (raw) | Column (processed) |
+|---|---|
+| <code>SepalLengthCm</code> | <code>sepallength_</code> |
+| <code>SepalWidthCm</code> | <code>sepalwidth_</code> |
+| <code>PetalLengthCm</code> | <code>petallength_</code> |
+| <code>PetalWidthCm</code> | <code>petalwidth_</code> |
+| <code>Species</code> = <code>Iris-setosa</code> | <code>species</code> = <code>setosa</code> |</p>
+<p><strong>Output</strong>: <code>/opt/airflow/data/iris_processed.csv</code></p>
+<hr />
+<h3>Step 5 — <code>upload_processed_to_s3</code> (LocalFilesystemToS3Operator)</h3>
+<p>Uploads the cleaned CSV to S3 for SageMaker access.</p>
+<div class="code-block language-python">upload_processed = LocalFilesystemToS3Operator(
+    task_id=&quot;upload_processed_to_s3&quot;,
+    filename=PROCESSED_FILE,
+    dest_bucket=S3_BUCKET,
+    dest_key=&quot;data/processed/iris.csv&quot;,
+    aws_conn_id=AWS_CONN_ID,
+    replace=True,
+)
+</div>
+<p><strong>S3 path</strong>: <code>s3://omni-ml-pipeline-us-east-1/data/processed/iris.csv</code></p>
+<hr />
+<h3>Step 6 — <code>init_ml_runs_table</code> (SQLExecuteQueryOperator)</h3>
+<p>Creates the PostgreSQL table for run metadata if it doesn't exist.</p>
+<div class="code-block language-python">init_ml_runs_table = SQLExecuteQueryOperator(
+    task_id=&quot;init_ml_runs_table&quot;,
+    conn_id=POSTGRES_CONN_ID,    # postgres_default
+    sql=&quot;&quot;&quot;
+        CREATE TABLE IF NOT EXISTS ml_runs (
+            id         SERIAL PRIMARY KEY,
+            run_id     TEXT,
+            accuracy   FLOAT,
+            model_path TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+    &quot;&quot;&quot;,
+)
+</div>
+<blockquote>
+<p><strong>Airflow 3.x note</strong>: <code>PostgresOperator</code> was removed. The replacement is <code>SQLExecuteQueryOperator</code> from <code>airflow.providers.common.sql</code> with <code>conn_id</code> (not <code>postgres_conn_id</code>).</p>
+</blockquote>
+<hr />
+<h3>Step 7 — <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#122-158">train_and_track</a> (@task)</h3>
+<p>Trains a RandomForest locally and logs everything to MLflow.</p>
+<div class="code-block language-python">@task
+def train_and_track():
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.metrics import accuracy_score
+    import joblib
+
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)    # http://mlflow:5000
+    mlflow.set_experiment(&quot;Omni_ML_Pro&quot;)
+
+    df = pd.read_csv(PROCESSED_FILE)
+    X = df.drop(&quot;species&quot;, axis=1)
+    y = df[&quot;species&quot;]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+    acc = accuracy_score(y_test, model.predict(X_test))
+
+    joblib.dump(model, MODEL_FILE)
+
+    with mlflow.start_run() as run:
+        mlflow.log_param(&quot;model&quot;, &quot;RandomForest&quot;)
+        mlflow.log_param(&quot;n_estimators&quot;, 100)
+        mlflow.log_metric(&quot;accuracy&quot;, acc)
+        mlflow.log_artifact(MODEL_FILE)
+        run_id = run.info.run_id
+
+    return {&quot;run_id&quot;: run_id, &quot;accuracy&quot;: acc, &quot;model_path&quot;: MODEL_FILE}
+</div>
+<p><strong>MLflow logs:</strong>
+- Params: <code>model=RandomForest</code>, <code>n_estimators=100</code>
+- Metric: <code>accuracy</code>
+- Artifact: <code>model.pkl</code></p>
+<p><strong>Returns via XCom</strong>: <code>{"run_id": "...", "accuracy": 0.9667, "model_path": "..."}</code></p>
+<hr />
+<h3>Step 8 — <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#160-177">upload_model_to_s3</a> (@task)</h3>
+<p>Uploads the trained model to S3 using <code>S3Hook</code> (Airflow-native).</p>
+<div class="code-block language-python">@task
+def upload_model_to_s3(data: dict):
+    hook = S3Hook(aws_conn_id=AWS_CONN_ID)
+    s3_key = f&quot;models/{data['run_id']}/model.pkl&quot;
+    hook.load_file(
+        filename=data[&quot;model_path&quot;],
+        key=s3_key,
+        bucket_name=S3_BUCKET,
+        replace=True,
+    )
+    data[&quot;s3_model_key&quot;] = s3_key
+    return data
+</div>
+<p><strong>S3 path</strong>: <code>s3://omni-ml-pipeline-us-east-1/models/&lt;run_id&gt;/model.pkl</code></p>
+<hr />
+<h3>Step 9 — <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#179-196">insert_run_to_postgres</a> (@task)</h3>
+<p>Persists run metadata into PostgreSQL using <code>PostgresHook</code>.</p>
+<div class="code-block language-python">@task
+def insert_run_to_postgres(data: dict):
+    hook = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
+    conn = hook.get_conn()
+    cur = conn.cursor()
+    cur.execute(
+        &quot;INSERT INTO ml_runs (run_id, accuracy, model_path) VALUES (%s, %s, %s)&quot;,
+        (data[&quot;run_id&quot;], data[&quot;accuracy&quot;], data.get(&quot;s3_model_key&quot;, MODEL_FILE)),
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+</div>
+<p><strong>Table written</strong>: <code>ml_runs</code> in the <code>airflow</code> PostgreSQL database.</p>
+<hr />
+<h3>Step 10 — <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#198-353">train_sagemaker</a> (@task)</h3>
+<p>Fully self-contained cloud training job on AWS SageMaker. Does not depend on local training results.</p>
+<h4>Sub-steps inside the task:</h4>
+<p><strong>10a — STS: Resolve real AWS account ID</strong></p>
+<div class="code-block language-python">sts_hook = AwsBaseHook(aws_conn_id=AWS_CONN_ID, client_type=&quot;sts&quot;)
+sts_client = sts_hook.get_client_type()
+account_id = sts_client.get_caller_identity()[&quot;Account&quot;]
+# → &quot;731285452138&quot;
+</div>
+<p><strong>10b — IAM: Auto-create or validate <code>AirflowSageMakerRole</code></strong></p>
+<div class="code-block language-python">iam_hook = AwsBaseHook(aws_conn_id=AWS_CONN_ID, client_type=&quot;iam&quot;)
+iam_client = iam_hook.get_client_type()
+
+# Find or create the execution role
+role = iam_client.get_role(RoleName=&quot;AirflowSageMakerRole&quot;)
+
+# Always ensure correct policies are attached (idempotent)
+required_policies = [
+    &quot;arn:aws:iam::aws:policy/AmazonSageMakerFullAccess&quot;,
+    &quot;arn:aws:iam::aws:policy/AmazonS3FullAccess&quot;,
+    &quot;arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly&quot;,  # ECR pull
+]
+for policy_arn in required_policies:
+    iam_client.attach_role_policy(RoleName=role_name, PolicyArn=policy_arn)
+</div>
+<p><strong>10c — Package training script as tar.gz → upload to S3</strong></p>
+<div class="code-block language-python">with tarfile.open(&quot;/tmp/sourcedir.tar.gz&quot;, &quot;w:gz&quot;) as tar:
+    tar.add(&quot;/opt/airflow/scripts/sagemaker_train.py&quot;, arcname=&quot;sagemaker_train.py&quot;)
+
+s3_client.upload_file(&quot;/tmp/sourcedir.tar.gz&quot;, S3_BUCKET, &quot;code/sourcedir.tar.gz&quot;)
+</div>
+<p><strong>10d — Submit SageMaker Training Job</strong></p>
+<div class="code-block language-python">sm_client.create_training_job(
+    TrainingJobName=f&quot;iris-train-{int(time.time())}&quot;,
+    AlgorithmSpecification={
+        &quot;TrainingImage&quot;: &quot;246618743249.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:1.0-1-cpu-py3&quot;,
+        &quot;TrainingInputMode&quot;: &quot;File&quot;,
+    },
+    HyperParameters={
+        &quot;sagemaker_program&quot;: &quot;sagemaker_train.py&quot;,
+        &quot;sagemaker_submit_directory&quot;: &quot;s3://omni-ml-pipeline-us-east-1/code/sourcedir.tar.gz&quot;,
+        &quot;n-estimators&quot;: &quot;100&quot;,
+    },
+    RoleArn=role_arn,
+    InputDataConfig=[{
+        &quot;ChannelName&quot;: &quot;train&quot;,
+        &quot;ContentType&quot;: &quot;text/csv&quot;,
+        &quot;DataSource&quot;: {&quot;S3DataSource&quot;: {
+            &quot;S3Uri&quot;: &quot;s3://omni-ml-pipeline-us-east-1/data/processed/&quot;,
+            ...
+        }},
+    }],
+    ResourceConfig={
+        &quot;InstanceCount&quot;: 1,
+        &quot;InstanceType&quot;: &quot;ml.m5.large&quot;,
+        &quot;VolumeSizeInGB&quot;: 5,
+    },
+    StoppingCondition={&quot;MaxRuntimeInSeconds&quot;: 3600},
+)
+</div>
+<p><strong>10e — Poll until complete</strong></p>
+<div class="code-block language-python">while True:
+    job_details = sm_client.describe_training_job(TrainingJobName=job_name)
+    status = job_details[&quot;TrainingJobStatus&quot;]
+    if status in (&quot;Completed&quot;, &quot;Failed&quot;, &quot;Stopped&quot;):
+        break
+    time.sleep(30)
+</div>
+<h4><a href="file:///c:/Users/modiv/Downloads/kol/scripts/sagemaker_train.py">scripts/sagemaker_train.py</a> — Runs Inside SageMaker Container</h4>
+<div class="code-block language-python">import argparse, os, pickle
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
+parser = argparse.ArgumentParser()
+parser.add_argument(&quot;--n-estimators&quot;, type=int, default=100)
+parser.add_argument(&quot;--model-dir&quot;, default=os.environ.get(&quot;SM_MODEL_DIR&quot;))
+parser.add_argument(&quot;--train&quot;,     default=os.environ.get(&quot;SM_CHANNEL_TRAIN&quot;))
+args = parser.parse_args()
+
+# SageMaker injects SM_CHANNEL_TRAIN pointing to the S3 input data
+df = pd.read_csv(os.path.join(args.train, &quot;iris_processed.csv&quot;))
+X, y = df.iloc[:, :-1], df.iloc[:, -1]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+model = RandomForestClassifier(n_estimators=args.n_estimators)
+model.fit(X_train, y_train)
+print(f&quot;[Train] Accuracy: {accuracy_score(y_test, model.predict(X_test)):.4f}&quot;)
+
+# Save to SM_MODEL_DIR — SageMaker uploads this to S3 automatically
+with open(os.path.join(args.model_dir, &quot;model.pkl&quot;), &quot;wb&quot;) as f:
+    pickle.dump(model, f)
+</div>
+<p><strong>SageMaker environment variables automatically injected:</strong>
+| Variable | Value |
+|---|---|
+| <code>SM_MODEL_DIR</code> | <code>/opt/ml/model</code> (saved to S3 post-job) |
+| <code>SM_CHANNEL_TRAIN</code> | <code>/opt/ml/input/data/train</code> (from S3 input) |</p>
+<hr />
+<h3>Step 11 — <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#355-453">bedrock_analysis</a> (@task)</h3>
+<p>Compares current and previous run accuracy using Amazon Bedrock Nova Lite for AI-powered MLOps insights.</p>
+<div class="code-block language-python">@task
+def bedrock_analysis(data: dict):
+
+    # 1. Fetch previous run accuracy from Postgres
+    hook_pg = PostgresHook(postgres_conn_id=POSTGRES_CONN_ID)
+    conn = hook_pg.get_conn()
+    cur = conn.cursor()
+    cur.execute(&quot;&quot;&quot;
+        SELECT accuracy FROM ml_runs
+        ORDER BY created_at DESC
+        LIMIT 1 OFFSET 1   -- second latest = previous run
+    &quot;&quot;&quot;)
+    prev_acc = cur.fetchone()
+
+    # 2. Build prompt (concise — 200 token limit)
+    prompt = (
+        f&quot;MLOps run summary (be brief, bullet points only):\n&quot;
+        f&quot;- Current accuracy: {current_acc:.4f}\n&quot;
+        f&quot;- Previous accuracy: {prev_str}\n&quot;
+        f&quot;- Model: RandomForest, Dataset: Iris\n&quot;
+        f&quot;Tasks: (1) Compare runs. (2) Flag drops &amp; likely cause. &quot;
+        f&quot;(3) One concrete improvement suggestion. (4) Retrain needed? Yes/No.&quot;
+    )
+
+    # 3. Extract credentials from Airflow connection (aws_real)
+    cred_hook = AwsBaseHook(aws_conn_id=AWS_CONN_ID, client_type=&quot;sts&quot;)
+    credentials = cred_hook.get_credentials()
+
+    # 4. Debug: list available models
+    bedrock_mgmt = boto3.client(&quot;bedrock&quot;, region_name=&quot;us-east-1&quot;, ...)
+    model_ids = [m[&quot;modelId&quot;] for m in bedrock_mgmt.list_foundation_models()[&quot;modelSummaries&quot;]]
+    print(f&quot;[Bedrock] Available models: {model_ids}&quot;)
+
+    # 5. Invoke Nova Lite (Messages API format)
+    client = boto3.client(&quot;bedrock-runtime&quot;, region_name=&quot;us-east-1&quot;, ...)
+    body = json.dumps({
+        &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: [{&quot;text&quot;: prompt}]}],
+        &quot;inferenceConfig&quot;: {&quot;maxTokens&quot;: 200, &quot;temperature&quot;: 0.3},
+    })
+    res = client.invoke_model(modelId=&quot;amazon.nova-lite-v1:0&quot;, body=body, ...)
+    analysis = res[&quot;output&quot;][&quot;message&quot;][&quot;content&quot;][0][&quot;text&quot;]
+</div>
+<p><strong>Model API Schemas comparison:</strong></p>
+<table class="table">
+<thead>
+<tr>
+<th>Model</th>
+<th>Request Format</th>
+<th>Response Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Titan Text Lite</td>
+<td><code>{"inputText": "...", "textGenerationConfig": {...}}</code></td>
+<td><code>results[0].outputText</code></td>
+</tr>
+<tr>
+<td><strong>Nova Lite</strong> ✅</td>
+<td><code>{"messages": [{"role":"user","content":[{"text":"..."}]}], "inferenceConfig": {...}}</code></td>
+<td><code>output.message.content[0].text</code></td>
+</tr>
+<tr>
+<td>Claude 3</td>
+<td><code>{"messages": [...], "max_tokens": N, "anthropic_version": "..."}</code></td>
+<td><code>content[0].text</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+</section>
+<section class="section" id="task-dependency-graph">
+<h2>🔀 Task Dependency Graph</h2>
+<div class="code-block language-bash"># 1. Start all services
+docker-compose down; docker-compose up -d
+
+# 2. Verify all healthy
+docker-compose ps
+
+# 3. Open Airflow UI
+# http://localhost:8080  (user: airflow / pass: airflow)
+
+# 4. Trigger the DAG
+# DAGs → omni_ml_pro_pipeline_v2 → ▶ Trigger
+</div>
+<hr />
+</section>
+<section class="section" id="checklist-before-first-run">
+<h2>✅ Checklist Before First Run</h2>
+<ul>
+<li>[ ] <code>aws_real</code> connection visible in Airflow UI (Admin → Connections)</li>
+<li>[ ] <code>KAGGLE_KEY</code> Variable set (Admin → Variables)</li>
+<li>[ ] MLflow accessible at <code>http://localhost:5000</code></li>
+<li>[ ] S3 bucket does NOT exist in wrong region from previous runs</li>
+<li>[ ] <code>AirflowSageMakerRole</code> exists or IAM user has <code>iam:CreateRole</code> permission</li>
+</ul>
+<hr />
+</section>
+<section class="section" id="security-design">
+<h2>🔑 Security Design</h2>
+<p>All credentials flow through <strong>Airflow's connection and variable system</strong>, never hardcoded:</p>
+<div class="code-block">.env file
+   └─ AIRFLOW_CONN_AWS_REAL  →  Airflow Connection Store (conn_id=aws_real)
+         └─ AwsBaseHook(aws_conn_id=&quot;aws_real&quot;)
+               └─ boto3 clients (S3, SageMaker, IAM, STS, Bedrock)
+</div>
+<p>The only exception is the <a href="file:///c:/Users/modiv/Downloads/kol/dags/omni_ml_pipeline.py#355-453">bedrock_analysis</a> task which extracts raw credentials from the hook and passes them explicitly to <code>boto3.client()</code> to force the <code>us-east-1</code> region regardless of the connection's region setting.</p>
+</section>
+</main>
+
+    <script>
+        // Dropdown toggle
+        function toggleDD(btn) {
+            btn.classList.toggle('open');
+            btn.nextElementSibling.classList.toggle('open');
+        }
+
+        // ── Sidebar Toggle ────────────────────────────────────────
+        function toggleSidebar() {
+            var isOpen = document.body.classList.toggle('sidebar-open');
+            var btn = document.getElementById('sidebarToggle');
+            btn.innerHTML = isOpen ? '&#x2715;' : '&#x2630;';
+            btn.title = isOpen ? 'Close sidebar' : 'Open sidebar';
+            try { localStorage.setItem('sidebarOpen', isOpen ? '1' : '0'); } catch (e) { }
+        }
+
+        // Restore sidebar preference on load
+        (function () {
+            var saved;
+            try { saved = localStorage.getItem('sidebarOpen'); } catch (e) { }
+            // Default: open on desktop, closed on mobile
+            var defaultOpen = window.innerWidth >= 901;
+            var shouldOpen = saved !== null ? saved === '1' : defaultOpen;
+            if (shouldOpen) {
+                document.body.classList.add('sidebar-open');
+                var btn = document.getElementById('sidebarToggle');
+                if (btn) { btn.innerHTML = '&#x2715;'; btn.title = 'Close sidebar'; }
+            }
+        })();
+
+        // Active nav on scroll & progress bar
+        const sections = document.querySelectorAll('.section');
+        const navLinks = document.querySelectorAll('.nav-list a');
+        const progressBar = document.getElementById('progress-bar');
+
+        window.addEventListener('scroll', () => {
+            // Progress Bar
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            progressBar.style.width = scrolled + '%';
+
+            // Active Nav
+            let cur = '';
+            sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) cur = s.id });
+            navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + cur) });
+        });
+
+        // ── Efficient Search ──────────────────────────────────────────
+        let searchTimer = null;
+        const MARK_CLASS = 'search-hl';
+
+        // Add highlight style once
+        (function () {
+            const s = document.createElement('style');
+            s.textContent = '.search-hl { background: rgba(99,102,241,0.45); color:#fff; border-radius:2px; padding:0 2px; }';
+            document.head.appendChild(s);
+        })();
+
+        function debouncedSearch() {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(runSearch, 250);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            runSearch();
+            document.getElementById('searchInput').focus();
+        }
+
+        function removeHighlights(el) {
+            el.querySelectorAll('.' + MARK_CLASS).forEach(function (mark) {
+                mark.replaceWith(document.createTextNode(mark.textContent));
+            });
+            el.normalize();
+        }
+
+        function highlightText(el, regex) {
+            // Walk text nodes and wrap matches
+            var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+                acceptNode: function (node) {
+                    // Skip inside code-block and existing marks
+                    var p = node.parentElement;
+                    if (p && (p.classList.contains('code-block') || p.classList.contains(MARK_CLASS))) return NodeFilter.FILTER_REJECT;
+                    return regex.test(node.textContent) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+                }
+            });
+            var nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach(function (node) {
+                regex.lastIndex = 0;
+                var frag = document.createDocumentFragment();
+                var last = 0, m;
+                var text = node.textContent;
+                while ((m = regex.exec(text)) !== null) {
+                    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+                    var mark = document.createElement('mark');
+                    mark.className = MARK_CLASS;
+                    mark.textContent = m[0];
+                    frag.appendChild(mark);
+                    last = m.index + m[0].length;
+                }
+                if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+                node.parentNode.replaceChild(frag, node);
+            });
+        }
+
+        function runSearch() {
+            var raw = document.getElementById('searchInput').value.trim();
+            var clearBtn = document.getElementById('searchClear');
+            var countEl = document.getElementById('searchCount');
+
+            // Remove all previous highlights
+            sections.forEach(function (s) { removeHighlights(s); s.style.display = ''; });
+            navLinks.forEach(function (a) {
+                var li = a.parentElement;
+                if (li) li.style.display = '';
+            });
+
+            if (!raw) {
+                clearBtn.style.display = 'none';
+                countEl.textContent = '';
+                document.getElementById('searchInput').style.borderColor = '';
+                return;
+            }
+
+            clearBtn.style.display = 'block';
+            document.getElementById('searchInput').style.borderColor = 'var(--accent)';
+
+            // Escape special regex chars, then build global case-insensitive regex
+            var escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            var regex = new RegExp(escaped, 'gi');
+
+            var matched = 0;
+            sections.forEach(function (s) {
+                var text = s.textContent || s.innerText;
+                regex.lastIndex = 0;
+                if (regex.test(text)) {
+                    s.style.display = '';
+                    regex.lastIndex = 0;
+                    highlightText(s, new RegExp(escaped, 'gi'));
+                    matched++;
+
+                    // Also show matching nav item
+                    var sid = s.getAttribute('id');
+                    navLinks.forEach(function (a) {
+                        if (a.getAttribute('href') === '#' + sid) {
+                            a.parentElement.style.display = '';
+                        }
+                    });
+                } else {
+                    s.style.display = 'none';
+                    // Hide nav item for hidden section
+                    var sid = s.getAttribute('id');
+                    navLinks.forEach(function (a) {
+                        if (a.getAttribute('href') === '#' + sid) {
+                            a.parentElement.style.display = 'none';
+                        }
+                    });
+                }
+            });
+
+            if (matched === 0) {
+                countEl.textContent = 'No results for "' + raw + '"';
+                countEl.style.color = 'var(--red)';
+            } else {
+                countEl.textContent = matched + ' section' + (matched > 1 ? 's' : '') + ' matched';
+                countEl.style.color = 'var(--green)';
+            }
+        }
+
+        // Legacy alias (in case any onkeyup still calls it)
+        function searchDocs() { debouncedSearch(); }
+
+        // Charts
+        const cColors = { bg: 'rgba(99,102,241,0.15)', border: '#6366f1', bg2: 'rgba(16,185,129,0.15)', border2: '#10b981', bg3: 'rgba(245,158,11,0.15)', border3: '#f59e0b', bg4: 'rgba(239,68,68,0.15)', border4: '#ef4444' };
+        Chart.defaults.color = '#94a3b8'; Chart.defaults.borderColor = '#1e293b'; Chart.defaults.font.family = 'Inter';
+
+        // PSI Chart
+        // Split Chart (Doughnut)
+        // Classification Metrics Radar
+        // SHAP Feature Importance
+        // Registry Lifecycle
+        // Monitoring Trend
+        // Loss Convergence Chart
+        // E2E Example — Model Comparison
+        // Dedent helper — strips common leading whitespace from a raw text string
+        function dedentCode(raw) {
+            var lines = raw.split('\n');
+            while (lines.length && !lines[0].trim()) lines.shift();
+            while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+            var minIndent = Infinity;
+            lines.forEach(function (line) {
+                if (!line.trim()) return;
+                var indent = line.match(/^(\s*)/)[1].length;
+                if (indent < minIndent) minIndent = indent;
+            });
+            if (minIndent === Infinity) minIndent = 0;
+            return lines.map(function (line) { return line.slice(minIndent); }).join('\n');
+        }
+
+        // ── COPY BUTTONS ────────────────────────────────────────────────────────────────
+        document.querySelectorAll('.code-block').forEach(function (block) {
+            var wrap = document.createElement('div');
+            wrap.className = 'code-wrap';
+            block.parentNode.insertBefore(wrap, block);
+            wrap.appendChild(block);
+            var btn = document.createElement('button');
+            btn.className = 'copy-btn';
+            btn.textContent = '\u29C9 Copy';
+            btn.title = 'Copy code';
+            btn.onclick = function () {
+                var text = block.innerText || block.textContent;
+                navigator.clipboard.writeText(text.trim()).then(function () {
+                    btn.textContent = '\u2713 Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(function () {
+                        btn.textContent = '\u29C9 Copy';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }).catch(function () {
+                    btn.textContent = 'Error';
+                    setTimeout(function () { btn.textContent = '\u29C9 Copy'; }, 1500);
+                });
+            };
+            wrap.appendChild(btn);
+        });
+
+        // ── BACK TO TOP ──────────────────────────────────────────────────────────────
+        var btt = document.getElementById('backToTop');
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > 300) btt.classList.add('visible');
+            else btt.classList.remove('visible');
+        }, { passive: true });
+
+        // ── READING TIME ───────────────────────────────────────────────────────────
+        document.querySelectorAll('.section').forEach(function (s) {
+            var h2 = s.querySelector('h2');
+            if (!h2) return;
+            var words = (s.textContent || '').trim().split(/\s+/).length;
+            var mins = Math.max(1, Math.round(words / 200));
+            var badge = document.createElement('span');
+            badge.className = 'read-time';
+            badge.textContent = '\u223c' + mins + ' min';
+            h2.appendChild(badge);
+        });
+
+        // ── THEME TOGGLE ─────────────────────────────────────────────────────────────
+        // Switch meaning: CHECKED = 🌙 DARK (moon), UNCHECKED = 🌅 LIGHT (sun)
+        function toggleTheme() {
+            var cb = document.getElementById('themeCheckbox');
+            var isDark = cb.checked;        // checked = dark mode (moon showing)
+            document.body.classList.toggle('light', !isDark);
+            try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch (e) { }
+        }
+        // Restore theme on load — default is DARK (checked)
+        (function () {
+            var t; try { t = localStorage.getItem('theme'); } catch (e) { }
+            var cb = document.getElementById('themeCheckbox');
+            if (t === 'light') {
+                document.body.classList.add('light');
+                if (cb) cb.checked = false;   // sun showing = light
+            } else {
+                document.body.classList.remove('light');
+                if (cb) cb.checked = true;    // moon showing = dark (default)
+            }
+        })();
+
+        // ── KEYBOARD SHORTCUTS ─────────────────────────────────────────────────────
+        document.addEventListener('keydown', function (e) {
+            var tag = document.activeElement ? document.activeElement.tagName : '';
+            // Press '/' to focus search (when not already in an input)
+            if (e.key === '/' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                e.preventDefault();
+                var inp = document.getElementById('searchInput');
+                if (inp) { inp.focus(); inp.select(); }
+            }
+            // Press 'b' to scroll to top (when not in an input)
+            if (e.key === 'b' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        // ── SYNTAX HIGHLIGHTING (highlight.js) ────────────────────────────────────────
+        (function applySyntaxHighlighting() {
+            if (typeof hljs === 'undefined') return;
+            var LANG_PATTERNS = [
+                { pattern: /\bimport\b|\bdef\b|\bclass\b|\bprint\(|\bfrom\b.+import|\bwith\b.+:\s*$|mlflow\.|sklearn\.|pd\.|np\.|torch\.|shap\./m, lang: 'python', cls: 'lang-python', label: 'Python' },
+                { pattern: /^\s*(pipeline|stages|training|evaluation|approval_gate|problem_type|model_type|learning_rate|batch_size|epochs|threshold|cmd:|deps:|outs:|params:|metrics:)/m, lang: 'yaml', cls: 'lang-yaml', label: 'YAML' },
+                { pattern: /\b(dvc|git|pip|conda|docker|kubectl|helm|export|echo|mkdir|cd\s|\$\s|bash|sh\s|curl\s|apt|yum|brew)/m, lang: 'bash', cls: 'lang-bash', label: 'Shell' },
+                { pattern: /^\s*\{|^\s*\[|":\s*(true|false|null|\d)/m, lang: 'json', cls: 'lang-json', label: 'JSON' },
+            ];
+            document.querySelectorAll('.code-wrap').forEach(function (wrap) {
+                var block = wrap.querySelector('.code-block');
+                if (!block) return;
+                var text = dedentCode(block.textContent || '');
+                var detected = null;
+                for (var i = 0; i < LANG_PATTERNS.length; i++) {
+                    if (LANG_PATTERNS[i].pattern.test(text)) { detected = LANG_PATTERNS[i]; break; }
+                }
+                // Apply highlight.js
+                var pre = document.createElement('pre');
+                var code = document.createElement('code');
+                code.className = detected ? 'language-' + detected.lang : 'language-plaintext';
+                code.textContent = text;
+                pre.appendChild(code);
+                pre.style.cssText = 'margin:0;background:transparent;padding:0;overflow:auto;';
+                block.innerHTML = '';
+                block.appendChild(pre);
+                try { hljs.highlightElement(code); } catch (e) { }
+                // Language label
+                if (detected) {
+                    wrap.classList.add('has-lang');
+                    var lbl = document.createElement('span');
+                    lbl.className = 'lang-label ' + detected.cls;
+                    lbl.textContent = detected.label;
+                    wrap.insertBefore(lbl, wrap.firstChild);
+                    // Push code down to not overlap label
+                    block.style.paddingTop = '28px';
+                }
+            });
+        })();
+
+        // ── ACTIVE SIDEBAR SECTION HIGHLIGHT (IntersectionObserver) ───────────────────
+        (function activeNavHighlight() {
+            var sections = document.querySelectorAll('.section[id]');
+            var navLinks = document.querySelectorAll('.nav-list a[href^="#"]');
+            if (!('IntersectionObserver' in window)) return;
+            var current = '';
+            var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (e.isIntersecting) current = e.target.id;
+                });
+                navLinks.forEach(function (a) {
+                    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+                });
+            }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+            sections.forEach(function (s) { obs.observe(s); });
+        })();
+
+        // ── ANCHOR LINKS ON HEADINGS ───────────────────────────────────────────────
+        document.querySelectorAll('.section h2, .section h3').forEach(function (h) {
+            if (!h.id) {
+                var slug = h.textContent.trim().toLowerCase().replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
+                h.id = slug;
+            }
+            var a = document.createElement('a');
+            a.className = 'anchor-link';
+            a.href = '#' + h.id;
+            a.textContent = '\u00b6';
+            a.title = 'Copy link to this section';
+            a.onclick = function (e) {
+                e.preventDefault();
+                history.pushState(null, '', '#' + h.id);
+                navigator.clipboard && navigator.clipboard.writeText(location.href);
+            };
+            h.appendChild(a);
+        });
+
+        // ── BOOKMARK BUTTONS ON SECTIONS ───────────────────────────────────────────
+        var bookmarks = {};
+        try { bookmarks = JSON.parse(localStorage.getItem('doc_bookmarks') || '{}'); } catch (e) { }
+        document.querySelectorAll('.section[id]').forEach(function (sec) {
+            var h2 = sec.querySelector('h2');
+            if (!h2) return;
+            var row = document.createElement('div');
+            row.className = 'section-header-row';
+            h2.parentNode.insertBefore(row, h2);
+            row.appendChild(h2);
+            var btn = document.createElement('button');
+            btn.className = 'bookmark-btn' + (bookmarks[sec.id] ? ' active' : '');
+            btn.title = 'Bookmark this section';
+            btn.textContent = bookmarks[sec.id] ? '\u2605' : '\u2606';
+            btn.onclick = function () {
+                var saved = bookmarks[sec.id];
+                if (saved) { delete bookmarks[sec.id]; btn.textContent = '\u2606'; btn.classList.remove('active'); }
+                else { bookmarks[sec.id] = 1; btn.textContent = '\u2605'; btn.classList.add('active'); }
+                try { localStorage.setItem('doc_bookmarks', JSON.stringify(bookmarks)); } catch (e) { }
+            };
+            row.appendChild(btn);
+        });
+
+        // ── GLOSSARY TOOLTIPS ────────────────────────────────────────────────────────────
+        var GLOSSARY = {
+            'MLOps': 'MLOps = ML + DevOps. Practices that streamline ML lifecycle: data, training, deployment, and monitoring.',
+            'WAPE': 'Weighted Absolute Percentage Error. Business-grade forecast accuracy metric robust to zero values. Lower is better.',
+            'MAPE': 'Mean Absolute Percentage Error. Average % error per observation. Sensitive to near-zero actual values.',
+            'MASE': 'Mean Absolute Scaled Error. Compares model MAE vs a na\u00efve baseline. MASE < 1 = better than baseline.',
+            'PSI': 'Population Stability Index. Measures distribution shift between datasets. PSI > 0.25 = significant drift.',
+            'SHAP': 'SHapley Additive exPlanations. Assigns each feature a contribution score to a prediction — mathematically grounded.',
+            'DVC': 'Data Version Control. Git-like versioning for datasets and ML pipelines. Stores large files in remote storage.',
+            'HITL': 'Human-in-the-Loop. A workflow where a human expert reviews and approves AI model decisions at critical stages.',
+            'DAG': 'Directed Acyclic Graph. A task dependency graph used by Airflow to define pipeline execution order.',
+            'CI/CD': 'Continuous Integration / Continuous Deployment. Automated pipeline for building, testing, and deploying code.',
+            'Airflow': 'Apache Airflow. Open-source workflow orchestration platform for scheduling and monitoring ML pipelines.',
+            'MLflow': 'Open-source platform for tracking ML experiments, logging metrics/params/artifacts, and managing model registry.',
+        };
+        (function applyGlossary() {
+            var textNodes = [];
+            function walk(node) {
+                var parentTag = node.parentNode ? node.parentNode.nodeName : '';
+                var isHeading = /^(H[1-6])$/.test(parentTag);
+                if (node.nodeType === 3 && parentTag !== 'CODE' && parentTag !== 'A'
+                    && parentTag !== 'SCRIPT' && parentTag !== 'STYLE' && !isHeading
+                    && !node.parentNode.classList.contains('glossary-term')
+                    && !node.parentNode.classList.contains('lang-label')) {
+                    if (node.textContent.trim().length > 0) textNodes.push(node);
+                } else {
+                    node.childNodes.forEach(walk);
+                }
+            }
+            document.querySelector('.main').childNodes.forEach(walk);
+
+            var terms = Object.keys(GLOSSARY);
+            // Create a single regex for all terms (whole word match)
+            var regex = new RegExp('\\b(' + terms.join('|') + ')\\b', 'g');
+
+            textNodes.forEach(function (node) {
+                var text = node.textContent;
+                if (!regex.test(text)) return;
+
+                var fragment = document.createDocumentFragment();
+                var lastIndex = 0;
+                regex.lastIndex = 0; // reset
+                var match;
+
+                while ((match = regex.exec(text)) !== null) {
+                    // text before match
+                    if (match.index > lastIndex) {
+                        fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+                    }
+                    // the glossary term
+                    var term = match[0];
+                    var span = document.createElement('span');
+                    span.className = 'glossary-term';
+                    span.innerHTML = term + '<span class="glossary-tip">' + GLOSSARY[term] + '</span>';
+                    fragment.appendChild(span);
+
+                    lastIndex = regex.lastIndex;
+                }
+                // text after last match
+                if (lastIndex < text.length) {
+                    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+                }
+
+                node.parentNode.replaceChild(fragment, node);
+            });
+        })();
+
+        // ── FONT SIZE CONTROL ───────────────────────────────────────────────────────────
+        var baseFontSize = 15;
+        try { baseFontSize = parseInt(localStorage.getItem('doc_fontsize') || '15'); } catch (e) { }
+        document.querySelector('.main').style.fontSize = baseFontSize + 'px';
+        function changeFontSize(delta) {
+            baseFontSize = Math.min(22, Math.max(12, baseFontSize + delta));
+            document.querySelector('.main').style.fontSize = baseFontSize + 'px';
+            try { localStorage.setItem('doc_fontsize', baseFontSize); } catch (e) { }
+        }
+
+        // ── PAGE STATISTICS ───────────────────────────────────────────────────────────
+        (function computePageStats() {
+            var mainEl = document.querySelector('.main');
+            var words = (mainEl.textContent || '').trim().split(/\s+/).length;
+            var mins = Math.round(words / 200);
+            var wEl = document.getElementById('statWords');
+            var tEl = document.getElementById('statReadTime');
+            if (wEl) wEl.textContent = '\u2714 ' + words.toLocaleString() + ' words';
+            if (tEl) tEl.textContent = '\u23f1 ~' + mins + ' min total read';
+        })();
+    </script>
+</body>
+
+</html>

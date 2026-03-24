@@ -10,9 +10,11 @@
 | Page | URL |
 |---|---|
 | 📘 Technical Documentation | [mlops_documentation.html](https://vanshccmodi.github.io/DOCS/mlops_documentation.html) |
+| 🚀 Real-Life MLOps Pipeline | [op_final.html](https://vanshccmodi.github.io/DOCS/op_final.html) |
 | 🚰 Pump Optimization Presentation | [pump_optimization.html](https://vanshccmodi.github.io/DOCS/pump_optimization.html) |
 | 📊 ETL Pipeline for Sensor Data Processing | [etl_airflow_dag.html](https://vanshccmodi.github.io/DOCS/etl_airflow_dag.html) |
 | ⚡ Universal MLOps Concept | [mlops_concept.html](https://vanshccmodi.github.io/DOCS/mlops_concept.html) |
+| 🚀 Omni ML Pro Pipeline v2 | [omni_ml_pipeline.html](https://vanshccmodi.github.io/DOCS/omni_ml_pipeline.html) |
 | 🕉️ Ramayana RAG: Story-Aware Archive | [RamayanaOg.html](https://vanshccmodi.github.io/DOCS/RamayanaOg.html) |
 | 🔄 Airflow & MLflow Integration Setup | [mlflow_with_airflow.html](https://vanshccmodi.github.io/DOCS/mlflow_with_airflow.html) |
 
@@ -20,7 +22,22 @@
 
 ## 📄 Pages at a Glance
 
-### 1. `etl_airflow_dag.html` — ETL Pipeline for Sensor Data Processing
+### 1. `op_final.html` — Real-Life MLOps Pipeline Documentation
+A **Premium Architecture**-driven documentation detailing a production-grade Industrial IoT ML system.
+
+**Sections covered:**
+- 🏗️ **System Architecture**: Vertical mermaid-flow of the full IoT data lifecycle.
+- 📁 **File Map**: Connectivity between DAGs, tasks, plugins, and APIs.
+- ⚙️ **Environment Setup**: Docker, .env, and Airflow configuration guides.
+- 🧪 **Task-by-Task**: Deep dive into KS-Drift testing, MLflow registry, and S3 deployment.
+- 📡 **API services**: Mock IoT sensor stream and FastAPI model serving.
+- 🛡️ **Resilience**: Retry logic, cleanup strategies, and failure callbacks.
+
+**Design system:** Modern Dual Theme (Light/Dark toggle) · Mermaid.js v10 Vertical Flow · Code Copy Buttons · Inter + JetBrains Mono fonts · Scroll Progress Tracking.
+
+---
+
+### 2. `etl_airflow_dag.html` — ETL Pipeline for Sensor Data Processing
 A **Premium Glassmorphism**-styled documentation detailng a production-grade sensor data ETL pipeline using Airflow, PostgreSQL, and MLflow.
 
 **Sections covered:**
@@ -29,84 +46,68 @@ A **Premium Glassmorphism**-styled documentation detailng a production-grade sen
 - 📝 **Atomic Traceability**: Inclusion of `run_date` and `batch_id` for expert-level data lineage.
 - 🧪 **AI Guards**: Anomaly Detection using **Isolation Forest** and Linear Regression trend analysis.
 - 📊 **MLflow Integration**: Tracking statistical distributions, dataset snapshots, and artifacts.
-- 💡 **The "Why's"**: Detailed engineering rationale for every design choice (Append vs Replace, validation, etc.).
 
-**Design system:** Dark Glassmorphism (`#0a0e1a` base, radial glow effects, `--accent: #6366f1`) · Inter font · Mermaid.js architecture visualization · Interactive nav tracking.
+**Design system:** Dark Glassmorphism (`#0a0e1a` base, radial glow effects, `--accent: #6366f1`) · Inter font · Mermaid.js architecture visualization.
 
 ---
 
-### 2. `mlops_documentation.html` — Technical Reference
+### 3. `mlops_documentation.html` — Technical Reference
 A **Neumorphism**-styled, scrollable documentation page covering the entire MLOps framework in depth.
 
 **Sections covered:**
 - 📐 Framework Overview & Architecture
-- 📊 Evaluation Metrics — MAE, RMSE, WAPE, Rolling WAPE, Bias, MASE, MAPE
+- 📊 Evaluation Metrics — MAE, RMSE, WAPE, Bias, MASE, MAPE
 - 🌿 SHAP-based Explainability
 - 🧪 MLflow — Experiment Tracking & Model Registry
 - 🌀 Airflow — Pipeline Orchestration & DAG Design
-- ️ Model Governance & Rollback Procedures
 - 📡 Production Monitoring & Drift Detection
 
-**Design system:** Dark Neumorphism (`#1e2030` base, inset/outset shadows, `--accent: #7c6af7`) · Inter + JetBrains Mono fonts · Active-scroll sidebar nav
+**Design system:** Dark Neumorphism (`#1e2030` base, inset/outset shadows) · Inter + JetBrains Mono fonts · Active-scroll sidebar nav.
 
-### 3. `RamayanaOg.html` — Ramayana RAG: Story-Aware Knowledge Archive
+---
+
+### 4. `RamayanaOg.html` — Ramayana RAG Knowledge Archive
 A **Neumorphic-Glassmorphism (v3)**-styled portal detailing a high-fidelity spiritual RAG system.
 
 **Sections covered:**
-- 🕉️ **Project Genesis**: Transforming the Valmiki Ramayana into a queryable deep-reasoning archive.
-- 🔍 **Research Journey**: Evolution from hybrid Sanskrit/English sources to optimal translation.
-- 🧩 **Story-Aware Strategy**: Narrative chunking (202 events) that respects chronological integrity.
-- ⚙️ **Technical Stack**: Implementation with **LanceDB**, **BGE-M3**, **FlashRank**, and resilient **Groq/SambaNova** failover.
-- ⚠️ **Domain Adaptation**: Critical analysis of RAG strategy generalizability across SOP, Legal, and Tech domains.
-- 🧪 **RAG Monitoring**: Automated safety gates for Faithfulness (>0.9) and Relevance (>0.85).
+- 🕉️ **Project Genesis**: Valmiki Ramayana to queryable deep-reasoning archive.
+- 🧩 **Story-Aware Strategy**: Narrative chunking (202 events) chronologically respected.
+- ⚙️ **Technical Stack**: LanceDB, BGE-M3, FlashRank, and Groq/SambaNova failover.
+- 🧪 **RAG Monitoring**: Automated safety gates for Faithfulness and Relevance.
 
-**Design system:** Dark Neumorphic-Glassmorphism (`#0a0e1a` base, `--accent: #6366f1`) · Mermaid.js Graph RAG viz · Interactive Story Timeline · Alias Glossary Search.
+**Design system:** Dark Neumorphic-Glassmorphism (`#0a0e1a` base) · Mermaid.js Graph RAG viz · Interactive Story Timeline.
 
 ---
 
-### 4. `pump_optimization.html` — Strategy Deck
-A **Claymorphism**-styled interactive presentation built for stakeholder and mentor walkthroughs, focused on the Smart Pump Monitoring / Ad Sales Forecasting system.
+### 5. `pump_optimization.html` — Strategy Deck
+A **Claymorphism**-styled interactive presentation focused on the Smart Pump Monitoring / Ad Sales Forecasting system.
 
 **Sections covered:**
-- 🗂️ Dashboard & Tool Selection rationale
-- 👤 Role & Responsibility boundaries (MLOps Engineer scope)
-- 🏗️ System Architecture overview
-- 🌀 Airflow Strategy
-- 🧪 MLflow Strategy
-- 🐋 Docker Strategy
-- 🔁 CI/CD Strategy — GitHub Actions
-- 🛡️ Model Governance
-- 📡 Monitoring & Alerting
-- ↩️ Rollback & Recovery (< 5-minute RTO)
-
-**Design system:** Light Claymorphism (`#e2e8f0` base, puffy card shadows) + full **Dark Mode** toggle · Inter + Fira Code fonts · Mermaid.js diagrams
+- 🏗️ Architecture, Airflow, MLflow, and Docker strategies.
+- 🔁 CI/CD Strategy via GitHub Actions.
+- 🛡️ Model Governance & Rollback Procedures.
+- 📡 Monitoring & Alerting systems.
 
 ---
 
-### 5. `mlops_concept.html` — Universal Framework Concept
-A **Modern Config-Driven Architecture** documentation page defining a generalized pipeline strategy for any machine learning paradigm.
+### 6. `mlops_concept.html` — Universal Framework Concept
+A **Modern Config-Driven Architecture** documentation page defining a generalized pipeline strategy.
 
 **Sections covered:**
 - ⚙️ Universal Config-Driven Design
 - 💾 Data Versioning (DVC) & Feature Store workflows
 - ⚖️ Automated Drift Detection & Retraining
-- 🧪 MLflow Tracking & Registry
-- 🌀 Airflow Orchestration & HITL Gates
-
-**Design system:** Dynamic Dual Theme (Light 🌅 / Dark 🌙 toggle) · Interactive code syntax highlighting · Glossary text tooltips · Inter + JetBrains Mono fonts
 
 ---
 
-### 6. `mlflow_with_airflow.html` — Integration Setup Guide
-A **Clean Modern**-styled guide documenting the complete setup process required to integrate MLflow with a Dockerized Apache Airflow environment.
+### 7. `omni_ml_pipeline.html` — Omni ML Pro Pipeline v2
+A **Production-grade MLOps Pipeline** documentation detailing a complete ML lifecycle orchestrating multiple AWS services natively on Airflow 3.x.
 
 **Sections covered:**
-- ⚙️ Environment Configuration (`.env`)
-- 🐋 Docker Compose Configuration
-- 📝 Version Control (`.gitignore`)
-- 🚀 How to Run the Stack & Verify
-
-**Design system:** Dynamic Dual Theme (Light 🌅 / Dark 🌙 toggle) · Code syntax highlighting with Copy Buttons · Inter + JetBrains Mono fonts
+- 🏗️ **Orchestration**: End-to-end task automation with Airflow.
+- 📦 **Training**: Local Scikit-learn vs Cloud AWS SageMaker Training.
+- 📊 **Model Tracking**: Deep integration with MLflow logging.
+- 🤖 **AI Analysis**: Utilizing Amazon Bedrock (Nova Lite) for automated report summaries.
 
 ---
 
@@ -117,21 +118,20 @@ A **Clean Modern**-styled guide documenting the complete setup process required 
 | **Apache Airflow 3.x** | Workflow orchestration — DAG-based scheduling & retries |
 | **MLflow** | Experiment tracking, model versioning, promotion gates |
 | **PostgreSQL 16** | Core data storage for Bronze/Silver/Gold tiers |
-| **Scikit-Learn** | ML-driven Anomaly Detection (Isolation Forest) |
-| **Pydantic v2** | Strict data validation & schema governance |
+| **AWS S3** | Production model artifacts & CHAMPION model hosting |
+| **FastAPI** | High-performance model serving & sensor simulation |
 | **Docker / Compose** | Reproducible environments across dev → staging → prod |
 
 ---
 
 ## 🎨 Design Highlights
 
-| | Tech Reference | Strategy Deck | Universal Concept | **Sensor ETL** |
+| | Technical Docs | Real-Life Pipeline | Universal Concept | **Sensor ETL** |
 |---|---|---|---|---|
-| **Style** | Neumorphism | Claymorphism | Clean Modern | **Glass v2** | **Neumorphic-Glass (v3)** |
-| **Font** | Inter | Fira Code | Inter | **Inter** | **Inter** |
-| **Nav** | Fixed sidebar | Sidebar switcher | Scroll-spy | **Fixed sidebar** | **Fixed sidebar** |
-| **Special** | Pipeline steps | Mermaid.js | Glossary tooltips | **Mermaid v2** | **Story Timeline** |
-| **Resp.** | ✅ | ✅ | ✅ | ✅ |
+| **Style** | Neumorphism | **Modern UI** | Clean Modern | **Glass v2** |
+| **Theme** | Dark Only | **Dual (L/D)** | Dual (L/D) | Dark Only |
+| **Nav** | Sidebar | **Fixed Sidebar** | Scroll-spy | Fixed sidebar |
+| **Diagram** | Static | **Mermaid TD** | Mermaid LR | Mermaid v2 |
 
 ---
 
@@ -144,21 +144,11 @@ No build tools needed — just open the files directly:
 git clone https://github.com/vanshccmodi/DOCS.git
 cd DOCS
 
-# Open in browser (Windows)
-start etl_airflow_dag.html
+# Open in browser (Example)
+start op_final.html
 start mlops_documentation.html
 start pump_optimization.html
-start mlops_concept.html
-start RamayanaOg.html
-start mlflow_with_airflow.html
-
-# Open in browser (macOS/Linux)
-open etl_airflow_dag.html
-open mlops_documentation.html
-open pump_optimization.html
-open mlops_concept.html
-open RamayanaOg.html
-open mlflow_with_airflow.html
+start omni_ml_pipeline.html
 ```
 
 ---
@@ -167,12 +157,14 @@ open mlflow_with_airflow.html
 
 ```
 DOCS/
-├── etl_airflow_dag.html       # ETL Pipeline for Sensor Data Processing (Premium)
-├── mlflow_with_airflow.html   # Airflow & MLflow Integration Setup Guide
-├── mlops_concept.html         # Universal config-driven architecture doc
-├── RamayanaOg.html           # Ramayana RAG Story-Aware Knowledge Archive
-├── mlops_documentation.html   # Technical reference (Neumorphism)
-├── pump_optimization.html     # Strategy deck (Claymorphism)
+├── op_final.html            # Real-Life Industrial MLOps Pipeline Documentation
+├── etl_airflow_dag.html     # ETL Pipeline for Sensor Data Processing
+├── mlflow_with_airflow.html # Airflow & MLflow Integration Setup Guide
+├── mlops_concept.html       # Universal config-driven architecture doc
+├── omni_ml_pipeline.html    # Omni ML Pro Pipeline v2 MLOps Architecture
+├── RamayanaOg.html         # Ramayana RAG Story-Aware Knowledge Archive
+├── mlops_documentation.html # Technical reference (Neumorphism)
+├── pump_optimization.html   # Strategy deck (Claymorphism)
 └── README.md
 ```
 
